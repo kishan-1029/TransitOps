@@ -1,7 +1,17 @@
+import 'dotenv/config';
 import bcrypt from 'bcryptjs';
 import { PrismaClient, Role, VehicleStatus, DriverStatus, TripStatus, MaintenanceStatus, VehicleType } from '@prisma/client';
+import { PrismaPg } from '@prisma/adapter-pg';
+import pg from 'pg';
 
-const prisma = new PrismaClient();
+const connectionString = (process.env.DATABASE_URL || '').split('?')[0];
+const pool = new pg.Pool({
+  connectionString,
+  max: 3,
+  connectionTimeoutMillis: 30_000,
+  ssl: { rejectUnauthorized: false },
+});
+const prisma = new PrismaClient({ adapter: new PrismaPg(pool) });
 
 async function main() {
   console.log('Seeding TransitOps...');
@@ -311,4 +321,5 @@ main()
   })
   .finally(async () => {
     await prisma.$disconnect();
+    await pool.end();
   });

@@ -5,10 +5,10 @@
   "scripts": {
     "dev": "node --watch src/index.js",
     "start": "node src/index.js",
-    "db:push": "prisma db push",
+    "db:push": "node scripts/db-push-retry.js",
     "db:seed": "node prisma/seed.js",
-    "db:setup": "prisma generate && prisma db push && node prisma/seed.js",
-    "prisma:generate": "prisma generate"
+    "db:setup": "node scripts/safe-generate.js && node scripts/db-push-retry.js && node prisma/seed.js",
+    "prisma:generate": "node scripts/safe-generate.js"
   },
   "prisma": {
     "seed": "node prisma/seed.js"
@@ -21,9 +21,9 @@
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
     "jsonwebtoken": "^9.0.2",
-    "transitops": "file:..",
     "pg": "^8.22.0",
     "swagger-ui-express": "^5.0.1",
+    "transitops": "file:..",
     "zod": "^3.24.2"
   },
   "devDependencies": {

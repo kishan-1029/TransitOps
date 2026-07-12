@@ -1,8 +1,8 @@
-import { PrismaClient, VehicleStatus, VehicleType } from '@prisma/client';
+import { VehicleStatus, VehicleType } from '@prisma/client';
+import { prisma } from '../lib/prisma.js';
 import { z } from 'zod';
 import { ok, fail } from '../utils/response.js';
 
-const prisma = new PrismaClient();
 
 const vehicleSchema = z.object({
   regNo: z.string().min(3),

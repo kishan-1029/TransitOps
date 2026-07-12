@@ -1,9 +1,9 @@
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '../lib/prisma.js';
+
 import { z } from 'zod';
 import { ok, fail } from '../utils/response.js';
 import { createMaintenance, closeMaintenance } from '../services/maintenanceService.js';
 
-const prisma = new PrismaClient();
 
 export async function listMaintenance(req, res) {
   try {

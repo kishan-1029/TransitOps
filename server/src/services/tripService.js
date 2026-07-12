@@ -1,6 +1,6 @@
-import { PrismaClient, VehicleStatus, DriverStatus, TripStatus } from '@prisma/client';
+import { VehicleStatus, DriverStatus, TripStatus } from '@prisma/client';
+import { prisma } from '../lib/prisma.js';
 
-const prisma = new PrismaClient();
 
 export function isLicenseValid(licenseExpiry) {
   const today = new Date();

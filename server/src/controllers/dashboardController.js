@@ -1,8 +1,8 @@
-import { PrismaClient, VehicleStatus, TripStatus, DriverStatus } from '@prisma/client';
+import { VehicleStatus, TripStatus, DriverStatus } from '@prisma/client';
+import { prisma } from '../lib/prisma.js';
 import { ok, fail } from '../utils/response.js';
 import { ROLE_PERMISSIONS } from '../utils/rbac.js';
 
-const prisma = new PrismaClient();
 
 function daysUntil(date) {
   const today = new Date();

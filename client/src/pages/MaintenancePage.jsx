@@ -11,6 +11,7 @@ import {
   btnPrimary,
   formatNumber,
 } from '../components/ui';
+import { RouteFallback } from '../components/Skeleton';
 
 export default function MaintenancePage() {
   const { can } = useAuth();
@@ -23,6 +24,7 @@ export default function MaintenancePage() {
     date: new Date().toISOString().slice(0, 10),
   });
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(true);
 
   async function load() {
     const [logRes, vehRes] = await Promise.all([
@@ -34,7 +36,10 @@ export default function MaintenancePage() {
   }
 
   useEffect(() => {
-    load().catch((e) => setError(e.response?.data?.message || 'Failed to load'));
+    setLoading(true);
+    load()
+      .catch((e) => setError(e.response?.data?.message || 'Failed to load'))
+      .finally(() => setLoading(false));
   }, []);
 
   async function onSave(e) {
@@ -58,9 +63,11 @@ export default function MaintenancePage() {
     }
   }
 
+  if (loading) return <RouteFallback />;
+
   return (
-    <div>
-      <PageHeader title="Maintenance" />
+    <div className="page-enter">
+      <PageHeader title="Maintenance" subtitle="Shop floor · In Shop status sync with dispatch pool" />
       {error ? <p className="mb-3 text-sm text-rose-400">{error}</p> : null}
 
       <div className="grid gap-4 lg:grid-cols-2">

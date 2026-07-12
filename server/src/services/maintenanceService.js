@@ -1,6 +1,6 @@
-import { PrismaClient, VehicleStatus, MaintenanceStatus } from '@prisma/client';
+import { VehicleStatus, MaintenanceStatus } from '@prisma/client';
+import { prisma } from '../lib/prisma.js';
 
-const prisma = new PrismaClient();
 
 export async function createMaintenance({ vehicleId, serviceType, cost, date, notes }) {
   return prisma.$transaction(async (tx) => {

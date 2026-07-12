@@ -59,8 +59,8 @@ export default function SettingsPage() {
   }
 
   return (
-    <div>
-      <PageHeader title="Settings & RBAC" />
+    <div className="page-enter">
+      <PageHeader title="Settings & RBAC" subtitle="Depot defaults · permission matrix" />
       {error ? <p className="mb-3 text-sm text-rose-400">{error}</p> : null}
       {message ? <p className="mb-3 text-sm text-emerald-400">{message}</p> : null}
 

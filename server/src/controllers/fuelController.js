@@ -1,8 +1,8 @@
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '../lib/prisma.js';
+
 import { z } from 'zod';
 import { ok, fail } from '../utils/response.js';
 
-const prisma = new PrismaClient();
 
 export async function listFuel(req, res) {
   try {

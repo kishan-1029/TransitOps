@@ -11,6 +11,7 @@ import {
 import api from '../api/client';
 import { API } from '../api/endpoints';
 import { PageHeader, KpiCard, btnPrimary, btnGhost, formatNumber, Panel } from '../components/ui';
+import { AnalyticsSkeleton } from '../components/Skeleton';
 
 export default function AnalyticsPage() {
   const [data, setData] = useState(null);
@@ -43,13 +44,19 @@ export default function AnalyticsPage() {
     window.print();
   }
 
-  if (error) return <p className="text-rose-500">{error}</p>;
-  if (!data) return <p className="text-[var(--color-muted)]">Loading analytics...</p>;
+  if (error) {
+    return (
+      <div className="page-enter rounded-xl border border-rose-500/40 bg-rose-500/10 px-4 py-6 text-center text-sm text-rose-600">
+        {error}
+      </div>
+    );
+  }
+  if (!data) return <AnalyticsSkeleton />;
 
   const costColors = ['#f5a3a3', '#e67e22', '#3498db', '#27ae60', '#9b59b6'];
 
   return (
-    <div ref={printRef} className="print-area">
+    <div ref={printRef} className="page-enter print-area">
       <PageHeader
         title="Reports & Analytics"
         subtitle="Fuel efficiency · utilization · cost · ROI · profitability"

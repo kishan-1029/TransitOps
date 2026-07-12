@@ -11,6 +11,7 @@ import {
   btnPrimary,
   btnGhost,
 } from '../components/ui';
+import { RouteFallback } from '../components/Skeleton';
 
 const emptyForm = {
   source: 'Gandhinagar Depot',
@@ -27,6 +28,7 @@ export default function TripsPage() {
   const [options, setOptions] = useState({ vehicles: [], drivers: [] });
   const [form, setForm] = useState(emptyForm);
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(true);
   const [completeModal, setCompleteModal] = useState(null);
   const [completeForm, setCompleteForm] = useState({ finalOdometer: '', fuelConsumed: '', fuelCost: '' });
 
@@ -55,7 +57,10 @@ export default function TripsPage() {
   }
 
   useEffect(() => {
-    load().catch((e) => setError(e.response?.data?.message || 'Failed to load trips'));
+    setLoading(true);
+    load()
+      .catch((e) => setError(e.response?.data?.message || 'Failed to load trips'))
+      .finally(() => setLoading(false));
   }, []);
 
   async function createTrip(e) {
@@ -108,9 +113,11 @@ export default function TripsPage() {
 
   const lifecycle = ['Draft', 'Dispatched', 'Completed', 'Cancelled'];
 
+  if (loading) return <RouteFallback />;
+
   return (
-    <div>
-      <PageHeader title="Trip Dispatcher" />
+    <div className="page-enter">
+      <PageHeader title="Trip Dispatcher" subtitle="Create · dispatch · complete · cancel with capacity rules" />
       {error ? (
         <div className="mb-4 rounded-lg border border-dashed border-rose-500 bg-rose-950/30 px-3 py-2 text-sm text-rose-300">
           ✕ {error}

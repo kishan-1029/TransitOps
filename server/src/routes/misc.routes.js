@@ -7,12 +7,14 @@ import {
   updateSettings,
 } from '../controllers/dashboardController.js';
 import { globalSearch } from '../controllers/searchController.js';
+import { chat } from '../controllers/chatController.js';
 import { authMiddleware, requirePermission } from '../middleware/auth.js';
 
 const router = Router();
 
 router.use(authMiddleware);
 router.get('/search', globalSearch);
+router.post('/chat', chat);
 router.get('/dashboard/kpis', requirePermission('dashboard', 'view'), dashboardKpis);
 router.get('/analytics/summary', requirePermission('analytics', 'view'), analyticsSummary);
 router.get('/analytics/export.csv', requirePermission('analytics', 'view'), exportCsv);

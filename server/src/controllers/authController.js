@@ -1,17 +1,22 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import { PrismaClient, Role } from '@prisma/client';
+import { Role } from '@prisma/client';
+import { prisma } from '../lib/prisma.js';
 import { z } from 'zod';
 import { ok, fail } from '../utils/response.js';
 import { ROLE_PERMISSIONS } from '../utils/rbac.js';
 
-const prisma = new PrismaClient();
 const MAX_ATTEMPTS = 5;
 const LOCKOUT_MINUTES = Number(process.env.LOCKOUT_MINUTES || 15);
 
 const loginSchema = z.object({
-  email: z.string().email(),
-  password: z.string().min(1),
+  email: z
+    .string()
+    .trim()
+    .toLowerCase()
+    .min(3, 'Email is required')
+    .regex(/^[^\s@]+@[^\s@]+\.[^\s@]+$/, 'Enter a valid email address'),
+  password: z.string().min(1, 'Password is required'),
   role: z.nativeEnum(Role).optional(),
 });
 
@@ -44,14 +49,15 @@ async function registerFailure(userId, currentAttempts) {
 export async function login(req, res) {
   try {
     const parsed = loginSchema.safeParse(req.body);
-    if (!parsed.success) return fail(res, parsed.error.errors[0].message);
+    if (!parsed.success) {
+      return fail(res, parsed.error.errors[0]?.message || 'Invalid login data', 400);
+    }
 
     const { email, password, role } = parsed.data;
-    const user = await prisma.user.findUnique({ where: { email: email.toLowerCase() } });
+    const user = await prisma.user.findUnique({ where: { email } });
 
     if (!user) return fail(res, 'Invalid credentials', 401);
 
-    // Timed lockout: auto-unlock when lockedUntil has passed
     if (user.locked) {
       if (user.lockedUntil && user.lockedUntil > new Date()) {
         return fail(res, lockMessage(user.lockedUntil), 403);
@@ -105,7 +111,10 @@ export async function login(req, res) {
     );
   } catch (err) {
     console.error(err);
-    return fail(res, 'Login failed', 500);
+    if (err.code === 'P2024' || err.message?.includes('connection pool')) {
+      return fail(res, 'Database is busy — wait a few seconds and try again.', 503);
+    }
+    return fail(res, 'Login failed — check API/database connection', 500);
   }
 }
 

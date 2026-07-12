@@ -47,9 +47,9 @@ export function KpiCard({ label, value, accent = 'info', hint, onClick }) {
       type="button"
       disabled={!clickable}
       onClick={onClick}
-      className={`relative w-full overflow-hidden rounded-xl border border-[var(--color-border)] bg-[var(--color-panel)] px-4 py-3 text-left shadow-sm transition ${
+      className={`relative w-full overflow-hidden rounded-xl border border-[var(--color-border)] bg-[var(--color-panel)] px-4 py-3 text-left shadow-sm transition duration-200 ${
         clickable
-          ? 'cursor-pointer hover:-translate-y-0.5 hover:border-[var(--color-accent)] hover:shadow-md'
+          ? 'cursor-pointer hover:-translate-y-0.5 hover:border-[var(--color-accent)] hover:shadow-md active:translate-y-0'
           : 'cursor-default'
       }`}
     >

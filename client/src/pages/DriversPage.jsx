@@ -12,6 +12,7 @@ import {
   maskPhone,
   formatDate,
 } from '../components/ui';
+import { TableSkeleton } from '../components/Skeleton';
 
 const emptyForm = {
   name: '',
@@ -47,6 +48,7 @@ export default function DriversPage() {
   const [editRow, setEditRow] = useState(null);
   const [form, setForm] = useState(emptyForm);
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(true);
 
   async function load() {
     const res = await api.get(API.drivers);
@@ -54,7 +56,10 @@ export default function DriversPage() {
   }
 
   useEffect(() => {
-    load().catch((e) => setError(e.response?.data?.message || 'Failed to load'));
+    setLoading(true);
+    load()
+      .catch((e) => setError(e.response?.data?.message || 'Failed to load'))
+      .finally(() => setLoading(false));
   }, []);
 
   const filtered = useMemo(() => {
@@ -98,7 +103,7 @@ export default function DriversPage() {
   }
 
   return (
-    <div>
+    <div className="page-enter">
       <PageHeader
         title="Drivers & Safety Profiles"
         subtitle="License tracking · safety scores · compliance filters"
@@ -135,6 +140,7 @@ export default function DriversPage() {
 
       {error ? <p className="mb-3 text-sm text-rose-500">{error}</p> : null}
 
+      {loading ? <TableSkeleton rows={7} cols={8} /> : (
       <div className="overflow-x-auto rounded-xl border border-[var(--color-border)] bg-[var(--color-panel)]">
         <table className="w-full text-left text-sm">
           <thead className="text-xs uppercase text-[var(--color-muted)]">
@@ -199,6 +205,7 @@ export default function DriversPage() {
           </tbody>
         </table>
       </div>
+      )}
 
       <div className="mt-4 flex flex-wrap items-center gap-3 text-sm">
         <span className="text-[var(--color-muted)]">STATUS LEGEND:</span>

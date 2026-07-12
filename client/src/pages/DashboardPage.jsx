@@ -4,6 +4,7 @@ import api from '../api/client';
 import { API } from '../api/endpoints';
 import { useAuth } from '../context/AuthContext';
 import { KpiCard, StatusBadge, inputClass, formatNumber, Panel, PageHeader } from '../components/ui';
+import { DashboardSkeleton } from '../components/Skeleton';
 
 export default function DashboardPage() {
   const { user, roleLabel, can } = useAuth();
@@ -13,6 +14,7 @@ export default function DashboardPage() {
   const [status, setStatus] = useState('All');
   const [region, setRegion] = useState('All');
   const [error, setError] = useState('');
+  const [refreshing, setRefreshing] = useState(false);
 
   function go(path) {
     if (!path) return;
@@ -24,31 +26,60 @@ export default function DashboardPage() {
   }
 
   async function load() {
+    setRefreshing((prev) => (data ? true : prev));
     try {
       const res = await api.get(API.dashboard, { params: { type, status, region } });
       setData(res.data.data);
       setError('');
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to load dashboard');
+    } finally {
+      setRefreshing(false);
     }
   }
 
   useEffect(() => {
     load();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- reload on filter change
   }, [type, status, region]);
 
-  if (error) return <p className="text-rose-500">{error}</p>;
-  if (!data) return <p className="text-[var(--color-muted)]">Loading dashboard...</p>;
+  if (error && !data) {
+    return (
+      <div className="page-enter rounded-xl border border-rose-500/40 bg-rose-500/10 px-4 py-6 text-center">
+        <p className="text-sm font-medium text-rose-600">{error}</p>
+        <button
+          type="button"
+          className="mt-3 text-sm text-[var(--color-accent)] underline"
+          onClick={() => {
+            setError('');
+            load();
+          }}
+        >
+          Retry
+        </button>
+      </div>
+    );
+  }
+
+  if (!data) return <DashboardSkeleton />;
 
   const { kpis, statusCounts, recentTrips, regions, licenseAlerts, lowSafetyDrivers, activeMaintenance, driverStatusBreakdown } = data;
   const role = user?.role;
   const totalStatus = Object.values(statusCounts).reduce((a, b) => a + b, 0) || 1;
 
   return (
-    <div>
+    <div className={`page-enter relative ${refreshing ? 'pointer-events-none opacity-70' : ''}`}>
+      {refreshing ? (
+        <div className="pointer-events-none absolute inset-x-0 top-0 z-10 flex justify-center">
+          <span className="rounded-full border border-[var(--color-border)] bg-[var(--color-panel)] px-3 py-1 text-[11px] text-[var(--color-muted)] shadow-sm">
+            Updating filters…
+          </span>
+        </div>
+      ) : null}
+
       <PageHeader
         title={`${roleLabel} Dashboard`}
-        subtitle="Live fleet metadata · filters apply to vehicle KPIs"
+        subtitle="Live fleet metadata · click any KPI or row to open the module"
       />
 
       <div className="mb-5">

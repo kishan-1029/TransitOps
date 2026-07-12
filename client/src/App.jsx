@@ -1,26 +1,23 @@
+import { Suspense, lazy } from 'react';
 import { Navigate, Route, Routes } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';
 import AppLayout from './layouts/AppLayout';
-import LoginPage from './pages/LoginPage';
-import DashboardPage from './pages/DashboardPage';
-import FleetPage from './pages/FleetPage';
-import DriversPage from './pages/DriversPage';
-import TripsPage from './pages/TripsPage';
-import MaintenancePage from './pages/MaintenancePage';
-import FuelPage from './pages/FuelPage';
-import AnalyticsPage from './pages/AnalyticsPage';
-import SettingsPage from './pages/SettingsPage';
+import { AuthFallback, RouteFallback } from './components/Skeleton';
+
+const LoginPage = lazy(() => import('./pages/LoginPage'));
+const DashboardPage = lazy(() => import('./pages/DashboardPage'));
+const FleetPage = lazy(() => import('./pages/FleetPage'));
+const DriversPage = lazy(() => import('./pages/DriversPage'));
+const TripsPage = lazy(() => import('./pages/TripsPage'));
+const MaintenancePage = lazy(() => import('./pages/MaintenancePage'));
+const FuelPage = lazy(() => import('./pages/FuelPage'));
+const AnalyticsPage = lazy(() => import('./pages/AnalyticsPage'));
+const SettingsPage = lazy(() => import('./pages/SettingsPage'));
 
 function Protected({ children }) {
   const { user, loading } = useAuth();
-  if (loading) {
-    return (
-      <div className="grid min-h-screen place-items-center bg-[var(--color-bg)] text-[var(--color-muted)]">
-        Loading...
-      </div>
-    );
-  }
+  if (loading) return <AuthFallback />;
   if (!user) return <Navigate to="/login" replace />;
   return children;
 }
@@ -31,10 +28,25 @@ function ModuleGate({ module, children }) {
   return children;
 }
 
+function LazyPage({ module, children }) {
+  return (
+    <ModuleGate module={module}>
+      <Suspense fallback={<RouteFallback />}>{children}</Suspense>
+    </ModuleGate>
+  );
+}
+
 function AppRoutes() {
   return (
     <Routes>
-      <Route path="/login" element={<LoginPage />} />
+      <Route
+        path="/login"
+        element={
+          <Suspense fallback={<AuthFallback />}>
+            <LoginPage />
+          </Suspense>
+        }
+      />
       <Route
         path="/"
         element={
@@ -43,14 +55,70 @@ function AppRoutes() {
           </Protected>
         }
       >
-        <Route index element={<ModuleGate module="dashboard"><DashboardPage /></ModuleGate>} />
-        <Route path="fleet" element={<ModuleGate module="fleet"><FleetPage /></ModuleGate>} />
-        <Route path="drivers" element={<ModuleGate module="drivers"><DriversPage /></ModuleGate>} />
-        <Route path="trips" element={<ModuleGate module="trips"><TripsPage /></ModuleGate>} />
-        <Route path="maintenance" element={<ModuleGate module="maintenance"><MaintenancePage /></ModuleGate>} />
-        <Route path="fuel" element={<ModuleGate module="fuel"><FuelPage /></ModuleGate>} />
-        <Route path="analytics" element={<ModuleGate module="analytics"><AnalyticsPage /></ModuleGate>} />
-        <Route path="settings" element={<ModuleGate module="settings"><SettingsPage /></ModuleGate>} />
+        <Route
+          index
+          element={
+            <LazyPage module="dashboard">
+              <DashboardPage />
+            </LazyPage>
+          }
+        />
+        <Route
+          path="fleet"
+          element={
+            <LazyPage module="fleet">
+              <FleetPage />
+            </LazyPage>
+          }
+        />
+        <Route
+          path="drivers"
+          element={
+            <LazyPage module="drivers">
+              <DriversPage />
+            </LazyPage>
+          }
+        />
+        <Route
+          path="trips"
+          element={
+            <LazyPage module="trips">
+              <TripsPage />
+            </LazyPage>
+          }
+        />
+        <Route
+          path="maintenance"
+          element={
+            <LazyPage module="maintenance">
+              <MaintenancePage />
+            </LazyPage>
+          }
+        />
+        <Route
+          path="fuel"
+          element={
+            <LazyPage module="fuel">
+              <FuelPage />
+            </LazyPage>
+          }
+        />
+        <Route
+          path="analytics"
+          element={
+            <LazyPage module="analytics">
+              <AnalyticsPage />
+            </LazyPage>
+          }
+        />
+        <Route
+          path="settings"
+          element={
+            <LazyPage module="settings">
+              <SettingsPage />
+            </LazyPage>
+          }
+        />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

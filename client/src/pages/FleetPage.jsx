@@ -13,6 +13,7 @@ import {
   formatNumber,
   Panel,
 } from '../components/ui';
+import { TableSkeleton } from '../components/Skeleton';
 
 const emptyForm = {
   regNo: '',
@@ -79,7 +80,7 @@ export default function FleetPage() {
   }
 
   return (
-    <div>
+    <div className="page-enter">
       <PageHeader
         title="Vehicle Registry"
         subtitle="Master list of fleet assets — filter by type, status, or registration"
@@ -147,6 +148,9 @@ export default function FleetPage() {
         </p>
       ) : null}
 
+      {loading ? (
+        <TableSkeleton rows={8} cols={7} />
+      ) : (
       <div className="overflow-hidden rounded-xl border border-[var(--color-border)] bg-[var(--color-panel)] shadow-sm">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
@@ -162,7 +166,7 @@ export default function FleetPage() {
               </tr>
             </thead>
             <tbody>
-              {!loading && vehicles.length === 0 ? (
+              {vehicles.length === 0 ? (
                 <tr>
                   <td colSpan={7} className="px-4 py-10 text-center text-[var(--color-muted)]">
                     No vehicles match these filters.
@@ -191,6 +195,7 @@ export default function FleetPage() {
           </table>
         </div>
       </div>
+      )}
 
       <p className="mt-3 rounded-lg border border-[var(--color-accent)]/30 bg-[var(--color-accent)]/10 px-3 py-2 text-sm text-[var(--color-accent)]">
         Rule: Registration No. must be unique · Retired / In Shop vehicles are hidden from Trip Dispatcher

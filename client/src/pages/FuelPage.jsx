@@ -12,6 +12,7 @@ import {
   formatNumber,
   StatusBadge,
 } from '../components/ui';
+import { RouteFallback } from '../components/Skeleton';
 
 export default function FuelPage() {
   const { can } = useAuth();
@@ -25,6 +26,7 @@ export default function FuelPage() {
   const [fuelForm, setFuelForm] = useState({ vehicleId: '', liters: 40, cost: 3000, date: new Date().toISOString().slice(0, 10) });
   const [expenseForm, setExpenseForm] = useState({ vehicleId: '', tripId: '', toll: 0, other: 0, maintenanceLinked: 0 });
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(true);
 
   async function load() {
     const [f, e, c, v] = await Promise.all([
@@ -48,7 +50,10 @@ export default function FuelPage() {
   }
 
   useEffect(() => {
-    load().catch((err) => setError(err.response?.data?.message || 'Failed to load'));
+    setLoading(true);
+    load()
+      .catch((err) => setError(err.response?.data?.message || 'Failed to load'))
+      .finally(() => setLoading(false));
   }, []);
 
   async function saveFuel(ev) {
@@ -76,9 +81,11 @@ export default function FuelPage() {
     }
   }
 
+  if (loading) return <RouteFallback />;
+
   return (
-    <div>
-      <PageHeader title="Fuel & Expense Management">
+    <div className="page-enter">
+      <PageHeader title="Fuel & Expense Management" subtitle="Liters · tolls · ops cost snapshot">
         {can('fuel', 'full') ? (
           <>
             <button type="button" className={btnPrimary} onClick={() => setShowFuel(true)}>

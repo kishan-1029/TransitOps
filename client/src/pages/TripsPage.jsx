@@ -10,6 +10,7 @@ import {
   inputClass,
   btnPrimary,
   btnGhost,
+  Pagination,
 } from '../components/ui';
 import { RouteFallback } from '../components/Skeleton';
 
@@ -25,6 +26,10 @@ const emptyForm = {
 export default function TripsPage() {
   const { can } = useAuth();
   const [trips, setTrips] = useState([]);
+  const [pagination, setPagination] = useState(null);
+  const [page, setPage] = useState(1);
+  const [sortBy, setSortBy] = useState('createdAt');
+  const [sortOrder, setSortOrder] = useState('desc');
   const [options, setOptions] = useState({ vehicles: [], drivers: [] });
   const [form, setForm] = useState(emptyForm);
   const [error, setError] = useState('');
@@ -47,21 +52,45 @@ export default function TripsPage() {
     return null;
   }, [selectedVehicle, form.cargoWeight]);
 
-  async function load() {
-    const [tripsRes, optRes] = await Promise.all([
-      api.get(API.trips),
-      can('trips', 'full') ? api.get(API.dispatchOptions) : Promise.resolve({ data: { data: { vehicles: [], drivers: [] } } }),
-    ]);
-    setTrips(tripsRes.data.data || []);
-    setOptions(optRes.data.data || { vehicles: [], drivers: [] });
+  async function loadOptions() {
+    if (can('trips', 'full')) {
+      const optRes = await api.get(API.dispatchOptions);
+      setOptions(optRes.data.data || { vehicles: [], drivers: [] });
+    }
+  }
+
+  async function loadTrips() {
+    const res = await api.get(API.trips, {
+      params: {
+        page,
+        limit: 8,
+        sortBy,
+        sortOrder,
+      },
+    });
+    if (res.data.data && res.data.data.items) {
+      setTrips(res.data.data.items);
+      setPagination(res.data.data.pagination);
+    } else {
+      setTrips(res.data.data || []);
+      setPagination(null);
+    }
+  }
+
+  async function refresh() {
+    await Promise.all([loadOptions(), loadTrips()]);
   }
 
   useEffect(() => {
     setLoading(true);
-    load()
+    Promise.all([loadOptions(), loadTrips()])
       .catch((e) => setError(e.response?.data?.message || 'Failed to load trips'))
       .finally(() => setLoading(false));
   }, []);
+
+  useEffect(() => {
+    loadTrips().catch((e) => setError(e.response?.data?.message || 'Failed to load trips'));
+  }, [page, sortBy, sortOrder]);
 
   async function createTrip(e) {
     e.preventDefault();
@@ -73,7 +102,7 @@ export default function TripsPage() {
     try {
       await api.post(API.trips, form);
       setForm({ ...emptyForm, vehicleId: '', driverId: '' });
-      await load();
+      await refresh();
     } catch (err) {
       setError(err.response?.data?.message || err.message);
     }
@@ -83,7 +112,7 @@ export default function TripsPage() {
     setError('');
     try {
       await api.post(`${API.trips}/${id}/dispatch`);
-      await load();
+      await refresh();
     } catch (err) {
       setError(err.response?.data?.message || err.message);
     }
@@ -93,7 +122,7 @@ export default function TripsPage() {
     setError('');
     try {
       await api.post(`${API.trips}/${id}/cancel`, { reason: 'Cancelled by dispatcher' });
-      await load();
+      await refresh();
     } catch (err) {
       setError(err.response?.data?.message || err.message);
     }
@@ -105,11 +134,26 @@ export default function TripsPage() {
     try {
       await api.post(`${API.trips}/${completeModal.id}/complete`, completeForm);
       setCompleteModal(null);
-      await load();
+      await refresh();
     } catch (err) {
       setError(err.response?.data?.message || err.message);
     }
   }
+
+  const toggleSort = (field) => {
+    if (sortBy === field) {
+      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortBy(field);
+      setSortOrder('asc');
+    }
+    setPage(1);
+  };
+
+  const getSortIcon = (field) => {
+    if (sortBy !== field) return <span className="opacity-30">⇅</span>;
+    return sortOrder === 'asc' ? '↑' : '↓';
+  };
 
   const lifecycle = ['Draft', 'Dispatched', 'Completed', 'Cancelled'];
 
@@ -203,6 +247,30 @@ export default function TripsPage() {
         )}
 
         <Panel title="Live Board">
+          <div className="mb-3 flex flex-wrap items-center justify-between gap-2 border-b border-[var(--color-border)] pb-2 text-xs">
+            <span className="font-semibold text-[var(--color-muted)]">SORT BY:</span>
+            <div className="flex gap-2">
+              {[
+                ['createdAt', 'Date'],
+                ['tripCode', 'Code'],
+                ['status', 'Status'],
+                ['plannedDistance', 'Distance'],
+              ].map(([field, label]) => (
+                <button
+                  key={field}
+                  type="button"
+                  onClick={() => toggleSort(field)}
+                  className={`px-2 py-1 rounded transition ${
+                    sortBy === field
+                      ? 'bg-[var(--color-accent)]/15 text-[var(--color-accent)] font-semibold'
+                      : 'text-[var(--color-muted)] hover:text-[var(--color-text)]'
+                  }`}
+                >
+                  {label} {sortBy === field ? (sortOrder === 'asc' ? '↑' : '↓') : ''}
+                </button>
+              ))}
+            </div>
+          </div>
           <div className="space-y-3">
             {trips.map((t) => (
               <div key={t.id} className="rounded-lg border border-[var(--color-border)] bg-[#121212] p-3">
@@ -250,6 +318,9 @@ export default function TripsPage() {
                 ) : null}
               </div>
             ))}
+          </div>
+          <div className="mt-4">
+            <Pagination pagination={pagination} onPageChange={setPage} />
           </div>
           <p className="mt-4 text-xs text-zinc-500">
             On Complete: odometer → fuel log → expenses → Vehicle & Driver Available

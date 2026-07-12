@@ -3,6 +3,6 @@ import app from './app.js';
 
 const PORT = process.env.PORT || 5000;
 
-app.listen(PORT, () => {
-  console.log(`TransitOps API listening on http://localhost:${PORT}`);
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`TransitOps API listening on http://0.0.0.0:${PORT}`);
 });

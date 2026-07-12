@@ -1,0 +1,17 @@
+export const API = {
+  login: '/api/auth/login',
+  me: '/api/auth/me',
+  vehicles: '/api/vehicles',
+  drivers: '/api/drivers',
+  trips: '/api/trips',
+  dispatchOptions: '/api/trips/dispatch-options',
+  maintenance: '/api/maintenance',
+  fuelLogs: '/api/fuel/logs',
+  expenses: '/api/fuel/expenses',
+  operationalCost: '/api/fuel/operational-cost',
+  dashboard: '/api/dashboard/kpis',
+  analytics: '/api/analytics/summary',
+  exportCsv: '/api/analytics/export.csv',
+  settings: '/api/settings',
+  search: '/api/search',
+};

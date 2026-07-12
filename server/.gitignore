@@ -1,0 +1,4 @@
+# Auto
+*.log
+.env
+node_modules/

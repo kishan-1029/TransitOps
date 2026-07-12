@@ -1,0 +1,76 @@
+@import "tailwindcss";
+
+@theme {
+  --color-accent: #e67e22;
+  --color-accent-hover: #d35400;
+  --color-success: #27ae60;
+  --color-info: #3498db;
+  --color-info-soft: #5dade2;
+  --color-danger: #e74c3c;
+  --font-sans: "Segoe UI", "Nunito Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Segoe UI Semibold", "Trebuchet MS", sans-serif;
+}
+
+:root,
+[data-theme="dark"] {
+  --color-bg: #0f0f0f;
+  --color-panel: #161616;
+  --color-panel-2: #1c1c1c;
+  --color-border: #2a2a2a;
+  --color-muted: #9a9a9a;
+  --color-text: #f2f2f2;
+  --color-text-strong: #ffffff;
+  --color-input-bg: #111111;
+  --color-brand-panel: #d4d4d4;
+  --color-brand-text: #1a1a1a;
+  --color-scrollbar: #333;
+}
+
+[data-theme="light"] {
+  --color-bg: #f3f4f6;
+  --color-panel: #ffffff;
+  --color-panel-2: #f8fafc;
+  --color-border: #e5e7eb;
+  --color-muted: #6b7280;
+  --color-text: #1f2937;
+  --color-text-strong: #111827;
+  --color-input-bg: #ffffff;
+  --color-brand-panel: #1c1917;
+  --color-brand-text: #fafaf9;
+  --color-scrollbar: #cbd5e1;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-sans);
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+input,
+select,
+button,
+textarea {
+  font: inherit;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-scrollbar);
+  border-radius: 8px;
+}

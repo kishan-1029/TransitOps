@@ -1,8 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth, ROLE_LABELS } from '../context/AuthContext';
-import { useTheme } from '../context/ThemeContext';
-import { Field, inputClass, btnPrimary, ThemeToggleButton } from '../components/ui';
+import { Field, inputClass, btnPrimary } from '../components/ui';
 
 const DEMO_PASSWORD = 'Password@123';
 
@@ -37,7 +36,6 @@ const DEMO_ACCOUNTS = [
 
 export default function LoginPage() {
   const { login } = useAuth();
-  const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
   const [email, setEmail] = useState(DEMO_ACCOUNTS[0].email);
   const [password, setPassword] = useState(DEMO_PASSWORD);
@@ -76,11 +74,7 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="relative grid min-h-screen lg:grid-cols-2">
-      <div className="absolute right-4 top-4 z-10">
-        <ThemeToggleButton theme={theme} onToggle={toggleTheme} />
-      </div>
-
+    <div className="grid min-h-screen lg:grid-cols-2">
       <section
         className="relative flex flex-col justify-between overflow-hidden px-8 py-10 sm:px-10 sm:py-12"
         style={{ background: 'var(--color-brand-panel)', color: 'var(--color-brand-text)' }}

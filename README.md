@@ -13,7 +13,7 @@ Digitizes **vehicle · driver · dispatch · maintenance · fuel/expenses · ana
 | **App URL** | **[https://transitops-bg9b.onrender.com/](https://transitops-bg9b.onrender.com/)** |
 | **Login** | [https://transitops-bg9b.onrender.com/login](https://transitops-bg9b.onrender.com/login) |
 | **API health** | [https://transitops-bg9b.onrender.com/api/health](https://transitops-bg9b.onrender.com/api/health) |
-| **API docs** | [https://transitops-bg9b.onrender.com/api-docs](https://transitops-bg9b.onrender.com/api-docs) |
+| **Swagger UI** | **[https://transitops-bg9b.onrender.com/api-docs](https://transitops-bg9b.onrender.com/api-docs)** — interactive OpenAPI docs for all endpoints |
 
 > **Note:** Render free tier may cold-start (30–60s) after idle. Wait and refresh once if the first load is slow. Neon DB may also wake on first login.
 
@@ -64,6 +64,7 @@ Sidebar menus change by **RBAC** after login.
 - Skeleton loaders + lazy-loaded pages  
 - 24-hour JWT sessions · multi-user concurrent login  
 - Timed lockout after 5 failed logins (15 minutes)
+- **Swagger UI** at `/api-docs` — [live](https://transitops-bg9b.onrender.com/api-docs)
 
 ---
 
@@ -127,6 +128,7 @@ More detail: [`TransitOps-Vault/Hosting-Without-Docker.md`](TransitOps-Vault/Hos
 5. **Safety Officer** → Drivers filters  
 6. **Financial Analyst** → Fuel & Analytics (CSV / Print)  
 7. Toggle **dark/light**, try **mobile width**, open **Ask** chatbot  
+8. Open **[Swagger UI](https://transitops-bg9b.onrender.com/api-docs)** to explore/test API endpoints  
 
 Video script (optional): [`TransitOps-Vault/Video-Presentation-Script.md`](TransitOps-Vault/Video-Presentation-Script.md)
 

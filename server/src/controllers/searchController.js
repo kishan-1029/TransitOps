@@ -1,8 +1,8 @@
-import { PrismaClient, VehicleType } from '@prisma/client';
+import { VehicleType } from '@prisma/client';
+import { prisma } from '../lib/prisma.js';
 import { ok, fail } from '../utils/response.js';
 import { canAccess } from '../utils/rbac.js';
 
-const prisma = new PrismaClient();
 
 export async function globalSearch(req, res) {
   try {

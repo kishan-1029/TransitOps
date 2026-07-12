@@ -1,4 +1,5 @@
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '../lib/prisma.js';
+
 import { z } from 'zod';
 import { ok, fail } from '../utils/response.js';
 import {
@@ -9,7 +10,6 @@ import {
   assertCapacity,
 } from '../services/tripService.js';
 
-const prisma = new PrismaClient();
 
 const createSchema = z.object({
   source: z.string().min(1),

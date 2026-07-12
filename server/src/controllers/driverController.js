@@ -1,9 +1,9 @@
-import { PrismaClient, DriverStatus } from '@prisma/client';
+import { DriverStatus } from '@prisma/client';
+import { prisma } from '../lib/prisma.js';
 import { z } from 'zod';
 import { ok, fail } from '../utils/response.js';
 import { isLicenseValid } from '../services/tripService.js';
 
-const prisma = new PrismaClient();
 
 const driverSchema = z.object({
   name: z.string().min(1),

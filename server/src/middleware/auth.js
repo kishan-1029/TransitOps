@@ -1,9 +1,9 @@
+import { prisma } from '../lib/prisma.js';
 import jwt from 'jsonwebtoken';
-import { PrismaClient } from '@prisma/client';
+
 import { fail } from '../utils/response.js';
 import { canAccess } from '../utils/rbac.js';
 
-const prisma = new PrismaClient();
 
 export async function authMiddleware(req, res, next) {
   try {

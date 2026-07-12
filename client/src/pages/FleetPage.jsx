@@ -145,7 +145,7 @@ export default function FleetPage() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+        <div className="grid grid-cols-1 gap-3 lg:grid-cols-3">
           <label className="block text-xs text-[var(--color-muted)]">
             <span className="mb-1 block font-medium text-[var(--color-text)]">Vehicle Type</span>
             <span className="mb-1.5 block text-[11px] opacity-80">Van · Truck · Mini body class</span>
@@ -193,7 +193,7 @@ export default function FleetPage() {
       ) : (
       <div className="overflow-hidden rounded-xl border border-[var(--color-border)] bg-[var(--color-panel)] shadow-sm">
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm">
+          <table className="w-full text-left text-sm min-w-[800px]">
             <thead>
               <tr className="border-b border-[var(--color-border)] bg-[var(--color-panel-2)] text-xs uppercase tracking-wide text-[var(--color-muted)]">
                 <th className="px-4 py-3 font-semibold cursor-pointer select-none hover:bg-black/5 dark:hover:bg-white/5 transition-colors" onClick={() => toggleSort('regNo')}>
@@ -262,7 +262,7 @@ export default function FleetPage() {
         <div className="fixed inset-0 z-50 grid place-items-center bg-black/50 p-4 backdrop-blur-[2px]">
           <form
             onSubmit={onSubmit}
-            className="w-full max-w-lg rounded-xl border border-[var(--color-border)] bg-[var(--color-panel)] p-5 shadow-2xl"
+            className="w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-xl border border-[var(--color-border)] bg-[var(--color-panel)] p-5 shadow-2xl"
           >
             <h3 className="mb-1 text-lg font-semibold text-[var(--color-text-strong)]">Add Vehicle</h3>
             <p className="mb-4 text-xs text-[var(--color-muted)]">

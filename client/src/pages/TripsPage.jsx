@@ -215,7 +215,7 @@ export default function TripsPage() {
                   ))}
                 </select>
               </Field>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <Field label="Cargo Weight (kg)">
                   <input type="number" className={inputClass} value={form.cargoWeight} onChange={(e) => setForm({ ...form, cargoWeight: e.target.value })} />
                 </Field>
@@ -330,7 +330,7 @@ export default function TripsPage() {
 
       {completeModal ? (
         <div className="fixed inset-0 z-50 grid place-items-center bg-black/70 p-4">
-          <form onSubmit={complete} className="w-full max-w-md rounded-xl border border-[var(--color-border)] bg-[#1a1a1a] p-5">
+          <form onSubmit={complete} className="w-full max-w-md max-h-[90vh] overflow-y-auto rounded-xl border border-[var(--color-border)] bg-[#1a1a1a] p-5 shadow-2xl">
             <h3 className="mb-3 text-lg font-semibold">Complete {completeModal.tripCode}</h3>
             <Field label="Final Odometer">
               <input type="number" className={inputClass} required value={completeForm.finalOdometer} onChange={(e) => setCompleteForm({ ...completeForm, finalOdometer: e.target.value })} />

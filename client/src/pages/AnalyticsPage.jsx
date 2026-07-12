@@ -69,7 +69,7 @@ export default function AnalyticsPage() {
         </button>
       </PageHeader>
 
-      <div className="mb-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="mb-4 grid gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
         <KpiCard
           label="Fuel Efficiency"
           value={`${data.fuelEfficiency} km/l`}
@@ -86,7 +86,7 @@ export default function AnalyticsPage() {
         <KpiCard label="Vehicle ROI (avg)" value={`${data.vehicleRoi}%`} accent="success" />
       </div>
 
-      <div className="mb-6 grid gap-3 sm:grid-cols-3">
+      <div className="mb-6 grid gap-3 grid-cols-1 sm:grid-cols-3">
         <KpiCard label="Total Revenue" value={formatNumber(data.totalRevenue)} accent="success" />
         <KpiCard label="Other Expenses" value={formatNumber(data.otherExpenses)} accent="soft" />
         <KpiCard label="Net Profit" value={formatNumber(data.profit)} accent="info" />
@@ -128,7 +128,7 @@ export default function AnalyticsPage() {
 
       <Panel title="Per-Vehicle Profitability">
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm">
+          <table className="w-full text-left text-sm min-w-[700px]">
             <thead className="text-xs uppercase text-[var(--color-muted)]">
               <tr>
                 <th className="py-2">Vehicle</th>

@@ -1,4 +1,4 @@
-import { Suspense, lazy } from 'react';
+import { Suspense, lazy, useState } from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import {
   BarChart3,
@@ -9,6 +9,8 @@ import {
   Truck,
   Users,
   Wrench,
+  Menu,
+  X,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
@@ -32,6 +34,7 @@ export default function AppLayout() {
   const { user, roleLabel, can, logout } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
+  const [isMobileOpen, setIsMobileOpen] = useState(false);
   const initials = (user?.name || 'U')
     .split(' ')
     .map((p) => p[0])
@@ -41,21 +44,42 @@ export default function AppLayout() {
 
   return (
     <div className="app-shell-bg flex min-h-screen text-[var(--color-text)]">
-      <aside className="sticky top-0 flex h-screen w-56 shrink-0 flex-col border-r border-[var(--color-border)] bg-[var(--color-panel)]/95 backdrop-blur-sm">
-        <div className="border-b border-[var(--color-border)] px-4 py-5">
+      {/* Mobile Sidebar Overlay */}
+      {isMobileOpen && (
+        <div
+          className="fixed inset-0 z-30 bg-black/60 md:hidden transition-opacity"
+          onClick={() => setIsMobileOpen(false)}
+        />
+      )}
+
+      {/* Sidebar container */}
+      <aside
+        className={`fixed inset-y-0 left-0 z-40 flex h-screen flex-col border-r border-[var(--color-border)] bg-[var(--color-panel)]/95 backdrop-blur-sm transition-transform duration-300 md:sticky md:translate-x-0 md:z-10
+          ${isMobileOpen ? 'translate-x-0 w-56' : '-translate-x-full w-56'}
+          md:w-16 lg:w-56`}
+      >
+        <div className="flex items-center justify-between border-b border-[var(--color-border)] px-4 py-5 shrink-0">
           <div className="flex items-center gap-2.5">
-            <div className="grid h-9 w-9 place-items-center rounded-lg bg-[#8B5E3C] text-xs font-bold text-white shadow-sm">
+            <div className="grid h-9 w-9 place-items-center rounded-lg bg-[#8B5E3C] text-xs font-bold text-white shadow-sm shrink-0">
               TO
             </div>
-            <div>
+            <div className="md:hidden lg:block">
               <span className="block text-lg font-semibold leading-tight tracking-tight text-[var(--color-text-strong)]">
                 TransitOps
               </span>
               <span className="text-[10px] uppercase tracking-wider text-[var(--color-muted)]">Operations</span>
             </div>
           </div>
+          <button
+            type="button"
+            onClick={() => setIsMobileOpen(false)}
+            className="md:hidden p-1.5 rounded-lg text-[var(--color-muted)] hover:bg-black/5"
+            aria-label="Close sidebar"
+          >
+            <X className="h-5 w-5" />
+          </button>
         </div>
-        <nav className="flex flex-1 flex-col gap-1 p-3">
+        <nav className="flex flex-1 flex-col gap-1 p-3 overflow-y-auto">
           {NAV.filter((item) => can(item.module, 'view')).map((item) => {
             const Icon = item.icon;
             return (
@@ -63,6 +87,7 @@ export default function AppLayout() {
                 key={item.to}
                 to={item.to}
                 end={item.to === '/'}
+                onClick={() => setIsMobileOpen(false)}
                 className={({ isActive }) =>
                   `flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm transition ${
                     isActive
@@ -72,21 +97,31 @@ export default function AppLayout() {
                 }
               >
                 <Icon className="h-4 w-4 shrink-0" strokeWidth={2} aria-hidden="true" />
-                <span>{item.label}</span>
+                <span className="md:hidden lg:inline">{item.label}</span>
               </NavLink>
             );
           })}
         </nav>
-        <div className="border-t border-[var(--color-border)] p-3 text-[10px] text-[var(--color-muted)]">
-          RBAC · TransitOps 2026
+        <div className="border-t border-[var(--color-border)] p-3 text-[10px] text-[var(--color-muted)] md:text-center lg:text-left shrink-0">
+          <span className="md:hidden lg:inline">RBAC · </span>TransitOps 2026
         </div>
       </aside>
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="sticky top-0 z-20 flex items-center justify-between gap-4 border-b border-[var(--color-border)] bg-[var(--color-panel)]/90 px-6 py-3 backdrop-blur-md">
-          <GlobalSearch />
-          <div className="flex shrink-0 items-center gap-3">
-            <div className="text-right">
+        <header className="sticky top-0 z-20 flex items-center justify-between gap-4 border-b border-[var(--color-border)] bg-[var(--color-panel)]/90 px-4 py-3 md:px-6 backdrop-blur-md shrink-0">
+          <div className="flex items-center gap-3 w-full max-w-md">
+            <button
+              type="button"
+              onClick={() => setIsMobileOpen(true)}
+              className="md:hidden p-2 rounded-lg border border-[var(--color-border)] text-[var(--color-muted)] hover:bg-black/5 shrink-0"
+              aria-label="Open sidebar"
+            >
+              <Menu className="h-5 w-5" />
+            </button>
+            <GlobalSearch />
+          </div>
+          <div className="flex shrink-0 items-center gap-2 sm:gap-3">
+            <div className="text-right hidden sm:block">
               <div className="text-sm font-medium text-[var(--color-text-strong)]">{user?.name}</div>
               <div className="text-xs text-sky-500">{roleLabel}</div>
             </div>
@@ -103,7 +138,7 @@ export default function AppLayout() {
             />
           </div>
         </header>
-        <main className="flex-1 overflow-auto p-6">
+        <main className="flex-1 overflow-auto p-4 md:p-6">
           <Outlet />
         </main>
         <Suspense fallback={null}>

@@ -186,7 +186,8 @@ export default function FuelPage() {
       {error ? <p className="mb-3 text-sm text-rose-400">{error}</p> : null}
 
       <Panel title="Fuel Logs" className="mb-4">
-        <table className="w-full text-left text-sm">
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-sm min-w-[500px]">
           <thead className="text-xs uppercase text-zinc-500">
             <tr>
               <th className="py-2 font-semibold cursor-pointer select-none hover:text-[var(--color-text)] transition-colors" onClick={() => toggleFuelSort('vehicle.name')}>
@@ -214,11 +215,12 @@ export default function FuelPage() {
             ))}
           </tbody>
         </table>
-        <Pagination pagination={fuelPagination} onPageChange={setFuelPage} />
+        </div>
       </Panel>
 
       <Panel title="Other Expenses (Toll / Misc)" className="mb-4">
-        <table className="w-full text-left text-sm">
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-sm min-w-[600px]">
           <thead className="text-xs uppercase text-zinc-500">
             <tr>
               <th className="py-2 font-semibold cursor-pointer select-none hover:text-[var(--color-text)] transition-colors" onClick={() => toggleExpSort('trip.tripCode')}>
@@ -256,7 +258,7 @@ export default function FuelPage() {
             ))}
           </tbody>
         </table>
-        <Pagination pagination={expPagination} onPageChange={setExpPage} />
+        </div>
       </Panel>
 
       <div className="flex items-center justify-between rounded-xl border border-[var(--color-border)] bg-[var(--color-panel)] px-4 py-3">
@@ -270,7 +272,7 @@ export default function FuelPage() {
 
       {showFuel ? (
         <div className="fixed inset-0 z-50 grid place-items-center bg-black/70 p-4">
-          <form onSubmit={saveFuel} className="w-full max-w-md rounded-xl border border-[var(--color-border)] bg-[#1a1a1a] p-5">
+          <form onSubmit={saveFuel} className="w-full max-w-md max-h-[90vh] overflow-y-auto rounded-xl border border-[var(--color-border)] bg-[#1a1a1a] p-5 shadow-2xl">
             <h3 className="mb-3 text-lg font-semibold">Log Fuel</h3>
             <Field label="Vehicle">
               <select className={inputClass} required value={fuelForm.vehicleId} onChange={(e) => setFuelForm({ ...fuelForm, vehicleId: e.target.value })}>
@@ -299,7 +301,7 @@ export default function FuelPage() {
 
       {showExpense ? (
         <div className="fixed inset-0 z-50 grid place-items-center bg-black/70 p-4">
-          <form onSubmit={saveExpense} className="w-full max-w-md rounded-xl border border-[var(--color-border)] bg-[#1a1a1a] p-5">
+          <form onSubmit={saveExpense} className="w-full max-w-md max-h-[90vh] overflow-y-auto rounded-xl border border-[var(--color-border)] bg-[#1a1a1a] p-5 shadow-2xl">
             <h3 className="mb-3 text-lg font-semibold">Add Expense</h3>
             <Field label="Vehicle">
               <select className={inputClass} required value={expenseForm.vehicleId} onChange={(e) => setExpenseForm({ ...expenseForm, vehicleId: e.target.value })}>

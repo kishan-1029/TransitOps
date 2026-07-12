@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { LogOut, Moon, Settings, Sun } from 'lucide-react';
+import { LogOut, Moon, MoreVertical, Sun } from 'lucide-react';
 
 export default function HeaderSettingsMenu({ theme, onToggleTheme, onLogout }) {
   const [open, setOpen] = useState(false);
@@ -34,7 +34,7 @@ export default function HeaderSettingsMenu({ theme, onToggleTheme, onLogout }) {
         aria-haspopup="menu"
         className="grid h-9 w-9 place-items-center rounded-lg border border-[var(--color-border)] text-[var(--color-muted)] transition hover:bg-black/5 hover:text-[var(--color-text)]"
       >
-        <Settings className="h-4 w-4" strokeWidth={2} aria-hidden="true" />
+        <MoreVertical className="h-4 w-4" strokeWidth={2} aria-hidden="true" />
       </button>
 
       {open ? (

@@ -101,7 +101,7 @@ export default function SettingsPage() {
 
         <Panel title="Role-Based Access (RBAC)">
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm">
+            <table className="w-full text-left text-sm min-w-[600px]">
               <thead className="text-xs uppercase text-zinc-500">
                 <tr>
                   <th className="py-2">Role</th>

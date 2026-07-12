@@ -84,7 +84,7 @@ export default function DashboardPage() {
 
       <div className="mb-5">
         <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-[var(--color-muted)]">Filters</p>
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+        <div className="grid grid-cols-1 gap-3 lg:grid-cols-3">
           <label className="block text-xs text-[var(--color-muted)]">
             <span className="mb-1 block">Vehicle Type</span>
             <select className={inputClass} value={type} onChange={(e) => setType(e.target.value)}>
@@ -117,7 +117,7 @@ export default function DashboardPage() {
       </div>
 
       {/* Core metadata KPIs — clickable when role has access */}
-      <div className="mb-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7">
+      <div className="mb-6 grid gap-3 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7">
         <KpiCard label="Active Vehicles" value={kpis.activeVehicles} accent="info" hint="Fleet registry" onClick={() => goIf('fleet', '/fleet')} />
         <KpiCard label="Available Vehicles" value={kpis.availableVehicles} accent="success" hint="Ready to dispatch" onClick={() => goIf('fleet', '/fleet')} />
         <KpiCard label="In Maintenance" value={String(kpis.vehiclesInMaintenance).padStart(2, '0')} accent="warn" hint="Shop floor" onClick={() => goIf('maintenance', '/maintenance')} />
@@ -129,7 +129,7 @@ export default function DashboardPage() {
 
       {/* Role-specific KPI strip */}
       {(role === 'FLEET_MANAGER') && (
-        <div className="mb-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="mb-6 grid gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
           <KpiCard label="Open Shop Jobs" value={activeMaintenance?.length || 0} accent="warn" hint="Active maintenance records" onClick={() => go('/maintenance')} />
           <KpiCard label="Avg Safety Score" value={kpis.avgSafetyScore} accent="info" hint="Drivers & compliance" onClick={() => go('/drivers')} />
           <KpiCard label="Ops Cost (Fuel+Maint)" value={formatNumber(kpis.operationalCost)} accent="warn" hint="Cost analytics" onClick={() => go('/analytics')} />
@@ -138,7 +138,7 @@ export default function DashboardPage() {
       )}
 
       {(role === 'SAFETY_OFFICER') && (
-        <div className="mb-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="mb-6 grid gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
           <KpiCard label="Expired Licenses" value={kpis.expiredLicenses} accent="danger" onClick={() => go('/drivers')} />
           <KpiCard label="Expiring ≤30 days" value={kpis.expiringLicenses} accent="warn" onClick={() => go('/drivers')} />
           <KpiCard label="Low Safety (<75)" value={kpis.lowSafetyCount} accent="warn" onClick={() => go('/drivers')} />
@@ -147,7 +147,7 @@ export default function DashboardPage() {
       )}
 
       {(role === 'FINANCIAL_ANALYST') && (
-        <div className="mb-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="mb-6 grid gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
           <KpiCard label="Fuel Cost" value={formatNumber(kpis.fuelCost)} accent="info" onClick={() => go('/fuel')} />
           <KpiCard label="Maintenance Cost" value={formatNumber(kpis.maintenanceCost)} accent="warn" onClick={() => go('/fuel')} />
           <KpiCard label="Other Expenses" value={formatNumber(kpis.otherExpenses)} accent="soft" onClick={() => go('/fuel')} />
@@ -156,7 +156,7 @@ export default function DashboardPage() {
       )}
 
       {(role === 'DRIVER' || role === 'DISPATCHER') && (
-        <div className="mb-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="mb-6 grid gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
           <KpiCard label="Live Dispatches" value={kpis.activeTrips} accent="info" hint="On the road now" onClick={() => go('/trips')} />
           <KpiCard label="Draft Queue" value={kpis.pendingTrips} accent="soft" onClick={() => go('/trips')} />
           <KpiCard label="Dispatch Pool" value={kpis.availableVehicles} accent="success" hint="Available vehicles" onClick={() => go('/fleet')} />
@@ -167,7 +167,7 @@ export default function DashboardPage() {
       <div className="grid gap-4 lg:grid-cols-2">
         <Panel title="Recent Trips">
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm">
+            <table className="w-full text-left text-sm min-w-[500px]">
               <thead className="text-xs uppercase text-[var(--color-muted)]">
                 <tr>
                   <th className="py-2">Trip</th>

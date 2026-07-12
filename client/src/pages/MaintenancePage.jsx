@@ -156,45 +156,38 @@ export default function MaintenancePage() {
         </Panel>
 
         <Panel title="Service Log">
-          <table className="w-full text-left text-sm">
-            <thead className="text-xs uppercase text-zinc-500">
-              <tr>
-                <th className="py-2 font-semibold cursor-pointer select-none hover:text-[var(--color-text)] transition-colors" onClick={() => toggleSort('vehicle.name')}>
-                  <span className="flex items-center gap-1">Vehicle {getSortIcon('vehicle.name')}</span>
-                </th>
-                <th className="font-semibold cursor-pointer select-none hover:text-[var(--color-text)] transition-colors" onClick={() => toggleSort('serviceType')}>
-                  <span className="flex items-center gap-1">Service {getSortIcon('serviceType')}</span>
-                </th>
-                <th className="font-semibold cursor-pointer select-none hover:text-[var(--color-text)] transition-colors" onClick={() => toggleSort('cost')}>
-                  <span className="flex items-center gap-1">Cost {getSortIcon('cost')}</span>
-                </th>
-                <th className="font-semibold cursor-pointer select-none hover:text-[var(--color-text)] transition-colors" onClick={() => toggleSort('status')}>
-                  <span className="flex items-center gap-1">Status {getSortIcon('status')}</span>
-                </th>
-                <th />
-              </tr>
-            </thead>
-            <tbody>
-              {logs.map((l) => (
-                <tr key={l.id} className="border-t border-[var(--color-border)]">
-                  <td className="py-2">{l.vehicle?.name}</td>
-                  <td>{l.serviceType}</td>
-                  <td>{formatNumber(l.cost)}</td>
-                  <td>
-                    <StatusBadge status={l.status === 'Active' ? 'InShop' : 'Completed'} />
-                  </td>
-                  <td>
-                    {can('maintenance', 'full') && l.status === 'Active' ? (
-                      <button type="button" className="text-xs text-sky-400" onClick={() => closeLog(l.id)}>
-                        Close
-                      </button>
-                    ) : null}
-                  </td>
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-sm min-w-[500px]">
+              <thead className="text-xs uppercase text-zinc-500">
+                <tr>
+                  <th className="py-2">Vehicle</th>
+                  <th>Service</th>
+                  <th>Cost</th>
+                  <th>Status</th>
+                  <th />
                 </tr>
-              ))}
-            </tbody>
-          </table>
-          <Pagination pagination={pagination} onPageChange={setPage} />
+              </thead>
+              <tbody>
+                {logs.map((l) => (
+                  <tr key={l.id} className="border-t border-[var(--color-border)]">
+                    <td className="py-2">{l.vehicle?.name}</td>
+                    <td>{l.serviceType}</td>
+                    <td>{formatNumber(l.cost)}</td>
+                    <td>
+                      <StatusBadge status={l.status === 'Active' ? 'InShop' : 'Completed'} />
+                    </td>
+                    <td>
+                      {can('maintenance', 'full') && l.status === 'Active' ? (
+                        <button type="button" className="text-xs text-sky-400" onClick={() => closeLog(l.id)}>
+                          Close
+                        </button>
+                      ) : null}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </Panel>
       </div>
     </div>

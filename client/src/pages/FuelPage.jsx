@@ -11,13 +11,24 @@ import {
   btnGhost,
   formatNumber,
   StatusBadge,
+  Pagination,
 } from '../components/ui';
 import { RouteFallback } from '../components/Skeleton';
 
 export default function FuelPage() {
   const { can } = useAuth();
   const [fuelLogs, setFuelLogs] = useState([]);
+  const [fuelPagination, setFuelPagination] = useState(null);
+  const [fuelPage, setFuelPage] = useState(1);
+  const [fuelSortBy, setFuelSortBy] = useState('date');
+  const [fuelSortOrder, setFuelSortOrder] = useState('desc');
+
   const [expenses, setExpenses] = useState([]);
+  const [expPagination, setExpPagination] = useState(null);
+  const [expPage, setExpPage] = useState(1);
+  const [expSortBy, setExpSortBy] = useState('createdAt');
+  const [expSortOrder, setExpSortOrder] = useState('desc');
+
   const [cost, setCost] = useState(null);
   const [vehicles, setVehicles] = useState([]);
   const [trips, setTrips] = useState([]);
@@ -28,15 +39,11 @@ export default function FuelPage() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
 
-  async function load() {
-    const [f, e, c, v] = await Promise.all([
-      api.get(API.fuelLogs),
-      api.get(API.expenses),
+  async function loadStatic() {
+    const [c, v] = await Promise.all([
       api.get(API.operationalCost),
       api.get(API.vehicles),
     ]);
-    setFuelLogs(f.data.data || []);
-    setExpenses(e.data.data || []);
     setCost(c.data.data);
     setVehicles(v.data.data || []);
     if (can('trips', 'view')) {
@@ -49,19 +56,67 @@ export default function FuelPage() {
     }
   }
 
+  async function loadFuel() {
+    const res = await api.get(API.fuelLogs, {
+      params: {
+        page: fuelPage,
+        limit: 5,
+        sortBy: fuelSortBy,
+        sortOrder: fuelSortOrder,
+      },
+    });
+    if (res.data.data && res.data.data.items) {
+      setFuelLogs(res.data.data.items);
+      setFuelPagination(res.data.data.pagination);
+    } else {
+      setFuelLogs(res.data.data || []);
+      setFuelPagination(null);
+    }
+  }
+
+  async function loadExpenses() {
+    const res = await api.get(API.expenses, {
+      params: {
+        page: expPage,
+        limit: 5,
+        sortBy: expSortBy,
+        sortOrder: expSortOrder,
+      },
+    });
+    if (res.data.data && res.data.data.items) {
+      setExpenses(res.data.data.items);
+      setExpPagination(res.data.data.pagination);
+    } else {
+      setExpenses(res.data.data || []);
+      setExpPagination(null);
+    }
+  }
+
+  async function refresh() {
+    await Promise.all([loadStatic(), loadFuel(), loadExpenses()]);
+  }
+
   useEffect(() => {
     setLoading(true);
-    load()
+    Promise.all([loadStatic(), loadFuel(), loadExpenses()])
       .catch((err) => setError(err.response?.data?.message || 'Failed to load'))
       .finally(() => setLoading(false));
   }, []);
+
+  useEffect(() => {
+    loadFuel().catch((err) => setError(err.response?.data?.message || 'Failed to load fuel'));
+  }, [fuelPage, fuelSortBy, fuelSortOrder]);
+
+  useEffect(() => {
+    loadExpenses().catch((err) => setError(err.response?.data?.message || 'Failed to load expenses'));
+  }, [expPage, expSortBy, expSortOrder]);
 
   async function saveFuel(ev) {
     ev.preventDefault();
     try {
       await api.post(API.fuelLogs, fuelForm);
       setShowFuel(false);
-      await load();
+      await refresh();
     } catch (err) {
       setError(err.response?.data?.message || err.message);
     }
@@ -75,11 +130,41 @@ export default function FuelPage() {
         tripId: expenseForm.tripId || null,
       });
       setShowExpense(false);
-      await load();
+      await refresh();
     } catch (err) {
       setError(err.response?.data?.message || err.message);
     }
   }
+
+  const toggleFuelSort = (field) => {
+    if (fuelSortBy === field) {
+      setFuelSortOrder(fuelSortOrder === 'asc' ? 'desc' : 'asc');
+    } else {
+      setFuelSortBy(field);
+      setFuelSortOrder('asc');
+    }
+    setFuelPage(1);
+  };
+
+  const getFuelSortIcon = (field) => {
+    if (fuelSortBy !== field) return <span className="opacity-30">⇅</span>;
+    return fuelSortOrder === 'asc' ? '↑' : '↓';
+  };
+
+  const toggleExpSort = (field) => {
+    if (expSortBy === field) {
+      setExpSortOrder(expSortOrder === 'asc' ? 'desc' : 'asc');
+    } else {
+      setExpSortBy(field);
+      setExpSortOrder('asc');
+    }
+    setExpPage(1);
+  };
+
+  const getExpSortIcon = (field) => {
+    if (expSortBy !== field) return <span className="opacity-30">⇅</span>;
+    return expSortOrder === 'asc' ? '↑' : '↓';
+  };
 
   if (loading) return <RouteFallback />;
 
@@ -104,10 +189,18 @@ export default function FuelPage() {
         <table className="w-full text-left text-sm">
           <thead className="text-xs uppercase text-zinc-500">
             <tr>
-              <th className="py-2">Vehicle</th>
-              <th>Date</th>
-              <th>Liters</th>
-              <th>Fuel Cost</th>
+              <th className="py-2 font-semibold cursor-pointer select-none hover:text-[var(--color-text)] transition-colors" onClick={() => toggleFuelSort('vehicle.name')}>
+                <span className="flex items-center gap-1">Vehicle {getFuelSortIcon('vehicle.name')}</span>
+              </th>
+              <th className="font-semibold cursor-pointer select-none hover:text-[var(--color-text)] transition-colors" onClick={() => toggleFuelSort('date')}>
+                <span className="flex items-center gap-1">Date {getFuelSortIcon('date')}</span>
+              </th>
+              <th className="font-semibold cursor-pointer select-none hover:text-[var(--color-text)] transition-colors" onClick={() => toggleFuelSort('liters')}>
+                <span className="flex items-center gap-1">Liters {getFuelSortIcon('liters')}</span>
+              </th>
+              <th className="font-semibold cursor-pointer select-none hover:text-[var(--color-text)] transition-colors" onClick={() => toggleFuelSort('cost')}>
+                <span className="flex items-center gap-1">Fuel Cost {getFuelSortIcon('cost')}</span>
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -121,18 +214,31 @@ export default function FuelPage() {
             ))}
           </tbody>
         </table>
+        <Pagination pagination={fuelPagination} onPageChange={setFuelPage} />
       </Panel>
 
       <Panel title="Other Expenses (Toll / Misc)" className="mb-4">
         <table className="w-full text-left text-sm">
           <thead className="text-xs uppercase text-zinc-500">
             <tr>
-              <th className="py-2">Trip</th>
-              <th>Vehicle</th>
-              <th>Toll</th>
-              <th>Other</th>
-              <th>Maint. (Linked)</th>
-              <th>Total</th>
+              <th className="py-2 font-semibold cursor-pointer select-none hover:text-[var(--color-text)] transition-colors" onClick={() => toggleExpSort('trip.tripCode')}>
+                <span className="flex items-center gap-1">Trip {getExpSortIcon('trip.tripCode')}</span>
+              </th>
+              <th className="font-semibold cursor-pointer select-none hover:text-[var(--color-text)] transition-colors" onClick={() => toggleExpSort('vehicle.name')}>
+                <span className="flex items-center gap-1">Vehicle {getExpSortIcon('vehicle.name')}</span>
+              </th>
+              <th className="font-semibold cursor-pointer select-none hover:text-[var(--color-text)] transition-colors" onClick={() => toggleExpSort('toll')}>
+                <span className="flex items-center gap-1">Toll {getExpSortIcon('toll')}</span>
+              </th>
+              <th className="font-semibold cursor-pointer select-none hover:text-[var(--color-text)] transition-colors" onClick={() => toggleExpSort('other')}>
+                <span className="flex items-center gap-1">Other {getExpSortIcon('other')}</span>
+              </th>
+              <th className="font-semibold cursor-pointer select-none hover:text-[var(--color-text)] transition-colors" onClick={() => toggleExpSort('maintenanceLinked')}>
+                <span className="flex items-center gap-1">Maint. (Linked) {getExpSortIcon('maintenanceLinked')}</span>
+              </th>
+              <th className="font-semibold cursor-pointer select-none hover:text-[var(--color-text)] transition-colors" onClick={() => toggleExpSort('toll')}>
+                <span className="flex items-center gap-1">Total {getExpSortIcon('toll')}</span>
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -150,6 +256,7 @@ export default function FuelPage() {
             ))}
           </tbody>
         </table>
+        <Pagination pagination={expPagination} onPageChange={setExpPage} />
       </Panel>
 
       <div className="flex items-center justify-between rounded-xl border border-[var(--color-border)] bg-[var(--color-panel)] px-4 py-3">

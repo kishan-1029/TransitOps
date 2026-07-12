@@ -119,3 +119,39 @@ export function formatDate(d) {
   const dt = new Date(d);
   return dt.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' });
 }
+
+export function Pagination({ pagination, onPageChange }) {
+  if (!pagination || pagination.totalPages <= 1) return null;
+  const { page, totalPages, totalCount } = pagination;
+
+  return (
+    <div className="mt-4 flex items-center justify-between border-t border-[var(--color-border)] pt-4">
+      <div className="text-xs text-[var(--color-muted)]">
+        Showing page <span className="font-semibold text-[var(--color-text-strong)]">{page}</span> of{' '}
+        <span className="font-semibold text-[var(--color-text-strong)]">{totalPages}</span> ({totalCount} total items)
+      </div>
+      <div className="flex gap-2">
+        <button
+          type="button"
+          disabled={page <= 1}
+          onClick={() => onPageChange(page - 1)}
+          className={`rounded-lg border border-[var(--color-border)] px-3 py-1.5 text-xs font-medium text-[var(--color-text)] transition duration-200 ${
+            page <= 1 ? 'opacity-50 cursor-not-allowed' : 'hover:border-[var(--color-accent)] active:scale-95 cursor-pointer'
+          }`}
+        >
+          Previous
+        </button>
+        <button
+          type="button"
+          disabled={page >= totalPages}
+          onClick={() => onPageChange(page + 1)}
+          className={`rounded-lg border border-[var(--color-border)] px-3 py-1.5 text-xs font-medium text-[var(--color-text)] transition duration-200 ${
+            page >= totalPages ? 'opacity-50 cursor-not-allowed' : 'hover:border-[var(--color-accent)] active:scale-95 cursor-pointer'
+          }`}
+        >
+          Next
+        </button>
+      </div>
+    </div>
+  );
+}

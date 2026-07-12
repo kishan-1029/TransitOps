@@ -1,16 +1,18 @@
 import { prisma } from '../lib/prisma.js';
-
 import { z } from 'zod';
 import { ok, fail } from '../utils/response.js';
+import { getPaginatedAndSorted } from '../utils/query.js';
 
 
 export async function listFuel(req, res) {
   try {
-    const logs = await prisma.fuelLog.findMany({
+    const result = await getPaginatedAndSorted({
+      model: prisma.fuelLog,
+      req,
       include: { vehicle: true },
-      orderBy: { date: 'desc' },
+      defaultSort: { date: 'desc' },
     });
-    return ok(res, logs);
+    return ok(res, result);
   } catch {
     return fail(res, 'Failed to list fuel logs', 500);
   }
@@ -45,15 +47,17 @@ export async function createFuel(req, res) {
 
 export async function listExpenses(req, res) {
   try {
-    const expenses = await prisma.expense.findMany({
+    const result = await getPaginatedAndSorted({
+      model: prisma.expense,
+      req,
       include: { vehicle: true, trip: true },
-      orderBy: { createdAt: 'desc' },
+      defaultSort: { createdAt: 'desc' },
+      mapFn: (e) => ({
+        ...e,
+        total: e.toll + e.other + e.maintenanceLinked,
+      }),
     });
-    const enriched = expenses.map((e) => ({
-      ...e,
-      total: e.toll + e.other + e.maintenanceLinked,
-    }));
-    return ok(res, enriched);
+    return ok(res, result);
   } catch {
     return fail(res, 'Failed to list expenses', 500);
   }

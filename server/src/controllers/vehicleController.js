@@ -2,6 +2,7 @@ import { VehicleStatus, VehicleType } from '@prisma/client';
 import { prisma } from '../lib/prisma.js';
 import { z } from 'zod';
 import { ok, fail } from '../utils/response.js';
+import { getPaginatedAndSorted } from '../utils/query.js';
 
 
 const vehicleSchema = z.object({
@@ -34,11 +35,13 @@ export async function listVehicles(req, res) {
       where.status = VehicleStatus.Available;
     }
 
-    const vehicles = await prisma.vehicle.findMany({
+    const result = await getPaginatedAndSorted({
+      model: prisma.vehicle,
+      req,
       where,
-      orderBy: { name: 'asc' },
+      defaultSort: { name: 'asc' },
     });
-    return ok(res, vehicles);
+    return ok(res, result);
   } catch (err) {
     console.error(err);
     return fail(res, 'Failed to list vehicles', 500);

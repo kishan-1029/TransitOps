@@ -12,6 +12,7 @@ import {
   btnGhost,
   formatNumber,
   Panel,
+  Pagination,
 } from '../components/ui';
 import { TableSkeleton } from '../components/Skeleton';
 
@@ -35,9 +36,13 @@ export default function FleetPage() {
     ? searchParams.get('status')
     : 'All';
   const [vehicles, setVehicles] = useState([]);
+  const [pagination, setPagination] = useState(null);
   const [type, setType] = useState('All');
   const [status, setStatus] = useState(initialStatus);
   const [search, setSearch] = useState('');
+  const [page, setPage] = useState(1);
+  const [sortBy, setSortBy] = useState('name');
+  const [sortOrder, setSortOrder] = useState('asc');
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState(emptyForm);
   const [error, setError] = useState('');
@@ -48,11 +53,31 @@ export default function FleetPage() {
     if (STATUS_FILTERS.has(next)) setStatus(next);
   }, [searchParams]);
 
+  useEffect(() => {
+    setPage(1);
+  }, [type, status, search]);
+
   async function load() {
     setLoading(true);
     try {
-      const res = await api.get(API.vehicles, { params: { type, status, search } });
-      setVehicles(res.data.data || []);
+      const res = await api.get(API.vehicles, {
+        params: {
+          type,
+          status,
+          search,
+          page,
+          limit: 8,
+          sortBy,
+          sortOrder,
+        },
+      });
+      if (res.data.data && res.data.data.items) {
+        setVehicles(res.data.data.items);
+        setPagination(res.data.data.pagination);
+      } else {
+        setVehicles(res.data.data || []);
+        setPagination(null);
+      }
       setError('');
     } catch (e) {
       setError(e.response?.data?.message || 'Failed to load');
@@ -63,7 +88,7 @@ export default function FleetPage() {
 
   useEffect(() => {
     load();
-  }, [type, status, search]);
+  }, [type, status, search, page, sortBy, sortOrder]);
 
   async function onSubmit(e) {
     e.preventDefault();
@@ -78,6 +103,21 @@ export default function FleetPage() {
       setError(err.response?.data?.message || err.message);
     }
   }
+
+  const toggleSort = (field) => {
+    if (sortBy === field) {
+      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortBy(field);
+      setSortOrder('asc');
+    }
+    setPage(1);
+  };
+
+  const getSortIcon = (field) => {
+    if (sortBy !== field) return <span className="opacity-30">⇅</span>;
+    return sortOrder === 'asc' ? '↑' : '↓';
+  };
 
   return (
     <div className="page-enter">
@@ -101,7 +141,7 @@ export default function FleetPage() {
             </p>
           </div>
           <p className="text-xs text-[var(--color-muted)]">
-            {loading ? 'Loading…' : `${vehicles.length} vehicle${vehicles.length === 1 ? '' : 's'}`}
+            {loading ? 'Loading…' : `${pagination?.totalCount || vehicles.length} vehicle${(pagination?.totalCount || vehicles.length) === 1 ? '' : 's'}`}
           </p>
         </div>
 
@@ -156,13 +196,27 @@ export default function FleetPage() {
           <table className="w-full text-left text-sm">
             <thead>
               <tr className="border-b border-[var(--color-border)] bg-[var(--color-panel-2)] text-xs uppercase tracking-wide text-[var(--color-muted)]">
-                <th className="px-4 py-3 font-semibold">Reg. No.</th>
-                <th className="py-3 font-semibold">Name / Model</th>
-                <th className="py-3 font-semibold">Type</th>
-                <th className="py-3 font-semibold">Capacity</th>
-                <th className="py-3 font-semibold">Odometer</th>
-                <th className="py-3 font-semibold">Acq. Cost</th>
-                <th className="py-3 pr-4 font-semibold">Status</th>
+                <th className="px-4 py-3 font-semibold cursor-pointer select-none hover:bg-black/5 dark:hover:bg-white/5 transition-colors" onClick={() => toggleSort('regNo')}>
+                  <div className="flex items-center gap-1">Reg. No. {getSortIcon('regNo')}</div>
+                </th>
+                <th className="py-3 font-semibold cursor-pointer select-none hover:bg-black/5 dark:hover:bg-white/5 transition-colors" onClick={() => toggleSort('name')}>
+                  <div className="flex items-center gap-1">Name / Model {getSortIcon('name')}</div>
+                </th>
+                <th className="py-3 font-semibold cursor-pointer select-none hover:bg-black/5 dark:hover:bg-white/5 transition-colors" onClick={() => toggleSort('type')}>
+                  <div className="flex items-center gap-1">Type {getSortIcon('type')}</div>
+                </th>
+                <th className="py-3 font-semibold cursor-pointer select-none hover:bg-black/5 dark:hover:bg-white/5 transition-colors" onClick={() => toggleSort('capacityKg')}>
+                  <div className="flex items-center gap-1">Capacity {getSortIcon('capacityKg')}</div>
+                </th>
+                <th className="py-3 font-semibold cursor-pointer select-none hover:bg-black/5 dark:hover:bg-white/5 transition-colors" onClick={() => toggleSort('odometer')}>
+                  <div className="flex items-center gap-1">Odometer {getSortIcon('odometer')}</div>
+                </th>
+                <th className="py-3 font-semibold cursor-pointer select-none hover:bg-black/5 dark:hover:bg-white/5 transition-colors" onClick={() => toggleSort('acquisitionCost')}>
+                  <div className="flex items-center gap-1">Acq. Cost {getSortIcon('acquisitionCost')}</div>
+                </th>
+                <th className="py-3 pr-4 font-semibold cursor-pointer select-none hover:bg-black/5 dark:hover:bg-white/5 transition-colors" onClick={() => toggleSort('status')}>
+                  <div className="flex items-center gap-1">Status {getSortIcon('status')}</div>
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -193,6 +247,9 @@ export default function FleetPage() {
               ))}
             </tbody>
           </table>
+        </div>
+        <div className="px-4 pb-4">
+          <Pagination pagination={pagination} onPageChange={setPage} />
         </div>
       </div>
       )}

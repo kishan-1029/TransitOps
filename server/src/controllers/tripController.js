@@ -1,7 +1,8 @@
 import { prisma } from '../lib/prisma.js';
-
 import { z } from 'zod';
 import { ok, fail } from '../utils/response.js';
+import { getPaginatedAndSorted } from '../utils/query.js';
+
 import {
   createTrip,
   dispatchTrip,
@@ -22,11 +23,13 @@ const createSchema = z.object({
 
 export async function listTrips(req, res) {
   try {
-    const trips = await prisma.trip.findMany({
+    const result = await getPaginatedAndSorted({
+      model: prisma.trip,
+      req,
       include: { vehicle: true, driver: true },
-      orderBy: { createdAt: 'desc' },
+      defaultSort: { createdAt: 'desc' },
     });
-    return ok(res, trips);
+    return ok(res, result);
   } catch (err) {
     console.error(err);
     return fail(res, 'Failed to list trips', 500);

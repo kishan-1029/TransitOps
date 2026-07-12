@@ -3,6 +3,7 @@ import { prisma } from '../lib/prisma.js';
 import { z } from 'zod';
 import { ok, fail } from '../utils/response.js';
 import { isLicenseValid } from '../services/tripService.js';
+import { getPaginatedAndSorted } from '../utils/query.js';
 
 
 const driverSchema = z.object({
@@ -27,7 +28,7 @@ function enrich(driver) {
 
 export async function listDrivers(req, res) {
   try {
-    const { status, search, forDispatch } = req.query;
+    const { status, search, forDispatch, filter } = req.query;
     const where = {};
     if (status && status !== 'All') where.status = status;
     if (search) {
@@ -37,17 +38,36 @@ export async function listDrivers(req, res) {
       ];
     }
     if (forDispatch === 'true') {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
       where.status = DriverStatus.Available;
+      where.licenseExpiry = { gte: today };
     }
 
-    let drivers = await prisma.driver.findMany({ where, orderBy: { name: 'asc' } });
-    drivers = drivers.map(enrich);
-
-    if (forDispatch === 'true') {
-      drivers = drivers.filter((d) => d.assignable);
+    if (filter === 'Expired') {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      where.licenseExpiry = { lt: today };
+    } else if (filter === 'Expiring') {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const in30Days = new Date(today.getTime() + 30 * 24 * 60 * 60 * 1000);
+      where.licenseExpiry = { gte: today, lte: in30Days };
+    } else if (filter === 'LowSafety') {
+      where.safetyScore = { lt: 75 };
+    } else if (filter === 'Suspended') {
+      where.status = DriverStatus.Suspended;
     }
 
-    return ok(res, drivers);
+    const result = await getPaginatedAndSorted({
+      model: prisma.driver,
+      req,
+      where,
+      defaultSort: { name: 'asc' },
+      mapFn: enrich,
+    });
+
+    return ok(res, result);
   } catch (err) {
     console.error(err);
     return fail(res, 'Failed to list drivers', 500);

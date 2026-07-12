@@ -1,17 +1,19 @@
 import { prisma } from '../lib/prisma.js';
-
 import { z } from 'zod';
 import { ok, fail } from '../utils/response.js';
 import { createMaintenance, closeMaintenance } from '../services/maintenanceService.js';
+import { getPaginatedAndSorted } from '../utils/query.js';
 
 
 export async function listMaintenance(req, res) {
   try {
-    const logs = await prisma.maintenanceLog.findMany({
+    const result = await getPaginatedAndSorted({
+      model: prisma.maintenanceLog,
+      req,
       include: { vehicle: true },
-      orderBy: { date: 'desc' },
+      defaultSort: { date: 'desc' },
     });
-    return ok(res, logs);
+    return ok(res, result);
   } catch (err) {
     return fail(res, 'Failed to list maintenance', 500);
   }

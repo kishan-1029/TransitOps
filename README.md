@@ -12,10 +12,21 @@ Digitizes **vehicle · driver · dispatch · maintenance · fuel/expenses · ana
 |---|---|
 | **App URL** | **[https://transitops-bg9b.onrender.com/](https://transitops-bg9b.onrender.com/)** |
 | **Login** | [https://transitops-bg9b.onrender.com/login](https://transitops-bg9b.onrender.com/login) |
+| **Demo video** | **[Watch on Google Drive](https://drive.google.com/file/d/1WiLU0Nh1jNhed9gSV-RLqTlp-1vKxP9a/view?usp=sharing)** |
 | **API health** | [https://transitops-bg9b.onrender.com/api/health](https://transitops-bg9b.onrender.com/api/health) |
 | **Swagger UI** | **[https://transitops-bg9b.onrender.com/api-docs](https://transitops-bg9b.onrender.com/api-docs)** — interactive OpenAPI docs for all endpoints |
 
 > **Note:** Render free tier may cold-start (30–60s) after idle. Wait and refresh once if the first load is slow. Neon DB may also wake on first login.
+
+### Screenshots
+
+**Login — reviewer quick login (RBAC demo accounts)**
+
+![TransitOps login page](docs/screenshots/login.png)
+
+**Fleet Manager dashboard — KPIs, filters, search, chatbot**
+
+![TransitOps Fleet Manager dashboard](docs/screenshots/dashboard.png)
 
 ### Reviewer quick login
 

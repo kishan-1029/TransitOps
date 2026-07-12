@@ -1,5 +1,7 @@
 import express from 'express';
 import cors from 'cors';
+import swaggerUi from 'swagger-ui-express';
+import { swaggerSpec } from './docs/swaggerSpec.js';
 import authRoutes from './routes/auth.routes.js';
 import vehicleRoutes from './routes/vehicle.routes.js';
 import driverRoutes from './routes/driver.routes.js';
@@ -22,6 +24,8 @@ app.use(express.json());
 app.get('/api/health', (req, res) => {
   res.json({ isOk: true, message: 'TransitOps API running', data: { ts: new Date() } });
 });
+
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 app.use('/api/auth', authRoutes);
 app.use('/api/vehicles', vehicleRoutes);

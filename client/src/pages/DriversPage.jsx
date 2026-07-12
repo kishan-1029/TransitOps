@@ -11,6 +11,7 @@ import {
   btnGhost,
   maskPhone,
   formatDate,
+  Pagination,
 } from '../components/ui';
 import { TableSkeleton } from '../components/Skeleton';
 
@@ -43,7 +44,11 @@ function band(score) {
 export default function DriversPage() {
   const { can } = useAuth();
   const [drivers, setDrivers] = useState([]);
+  const [pagination, setPagination] = useState(null);
   const [filter, setFilter] = useState('All');
+  const [page, setPage] = useState(1);
+  const [sortBy, setSortBy] = useState('name');
+  const [sortOrder, setSortOrder] = useState('asc');
   const [showForm, setShowForm] = useState(false);
   const [editRow, setEditRow] = useState(null);
   const [form, setForm] = useState(emptyForm);
@@ -51,27 +56,36 @@ export default function DriversPage() {
   const [loading, setLoading] = useState(true);
 
   async function load() {
-    const res = await api.get(API.drivers);
-    setDrivers(res.data.data || []);
+    const res = await api.get(API.drivers, {
+      params: {
+        filter,
+        page,
+        limit: 8,
+        sortBy,
+        sortOrder,
+      },
+    });
+    if (res.data.data && res.data.data.items) {
+      setDrivers(res.data.data.items);
+      setPagination(res.data.data.pagination);
+    } else {
+      setDrivers(res.data.data || []);
+      setPagination(null);
+    }
   }
+
+  useEffect(() => {
+    setPage(1);
+  }, [filter]);
 
   useEffect(() => {
     setLoading(true);
     load()
       .catch((e) => setError(e.response?.data?.message || 'Failed to load'))
       .finally(() => setLoading(false));
-  }, []);
+  }, [filter, page, sortBy, sortOrder]);
 
-  const filtered = useMemo(() => {
-    return drivers.filter((d) => {
-      const days = daysLeft(d.licenseExpiry);
-      if (filter === 'Expired') return days < 0;
-      if (filter === 'Expiring') return days >= 0 && days <= 30;
-      if (filter === 'LowSafety') return d.safetyScore < 75;
-      if (filter === 'Suspended') return d.status === 'Suspended';
-      return true;
-    });
-  }, [drivers, filter]);
+  const filtered = drivers;
 
   async function onSubmit(e) {
     e.preventDefault();
@@ -101,6 +115,21 @@ export default function DriversPage() {
       setError(err.response?.data?.message || err.message);
     }
   }
+
+  const toggleSort = (field) => {
+    if (sortBy === field) {
+      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortBy(field);
+      setSortOrder('asc');
+    }
+    setPage(1);
+  };
+
+  const getSortIcon = (field) => {
+    if (sortBy !== field) return <span className="opacity-30">⇅</span>;
+    return sortOrder === 'asc' ? '↑' : '↓';
+  };
 
   return (
     <div className="page-enter">
@@ -145,14 +174,30 @@ export default function DriversPage() {
         <table className="w-full text-left text-sm">
           <thead className="text-xs uppercase text-[var(--color-muted)]">
             <tr>
-              <th className="px-4 py-3">Driver</th>
-              <th>License No</th>
-              <th>Category</th>
-              <th>Expiry / Track</th>
-              <th>Contact</th>
-              <th>Trip Compl.</th>
-              <th>Safety Score</th>
-              <th>Status</th>
+              <th className="px-4 py-3 font-semibold cursor-pointer select-none hover:bg-black/5 dark:hover:bg-white/5 transition-colors" onClick={() => toggleSort('name')}>
+                <div className="flex items-center gap-1">Driver {getSortIcon('name')}</div>
+              </th>
+              <th className="font-semibold cursor-pointer select-none hover:bg-black/5 dark:hover:bg-white/5 transition-colors" onClick={() => toggleSort('licenseNo')}>
+                <div className="flex items-center gap-1">License No {getSortIcon('licenseNo')}</div>
+              </th>
+              <th className="font-semibold cursor-pointer select-none hover:bg-black/5 dark:hover:bg-white/5 transition-colors" onClick={() => toggleSort('licenseCategory')}>
+                <div className="flex items-center gap-1">Category {getSortIcon('licenseCategory')}</div>
+              </th>
+              <th className="font-semibold cursor-pointer select-none hover:bg-black/5 dark:hover:bg-white/5 transition-colors" onClick={() => toggleSort('licenseExpiry')}>
+                <div className="flex items-center gap-1">Expiry / Track {getSortIcon('licenseExpiry')}</div>
+              </th>
+              <th className="font-semibold cursor-pointer select-none hover:bg-black/5 dark:hover:bg-white/5 transition-colors" onClick={() => toggleSort('contact')}>
+                <div className="flex items-center gap-1">Contact {getSortIcon('contact')}</div>
+              </th>
+              <th className="font-semibold cursor-pointer select-none hover:bg-black/5 dark:hover:bg-white/5 transition-colors" onClick={() => toggleSort('tripCompletion')}>
+                <div className="flex items-center gap-1">Trip Compl. {getSortIcon('tripCompletion')}</div>
+              </th>
+              <th className="font-semibold cursor-pointer select-none hover:bg-black/5 dark:hover:bg-white/5 transition-colors" onClick={() => toggleSort('safetyScore')}>
+                <div className="flex items-center gap-1">Safety Score {getSortIcon('safetyScore')}</div>
+              </th>
+              <th className="font-semibold cursor-pointer select-none hover:bg-black/5 dark:hover:bg-white/5 transition-colors" onClick={() => toggleSort('status')}>
+                <div className="flex items-center gap-1">Status {getSortIcon('status')}</div>
+              </th>
               {can('drivers', 'full') ? <th /> : null}
             </tr>
           </thead>
@@ -204,6 +249,9 @@ export default function DriversPage() {
             })}
           </tbody>
         </table>
+        <div className="px-4 pb-4">
+          <Pagination pagination={pagination} onPageChange={setPage} />
+        </div>
       </div>
       )}
 

@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "node --watch src/index.js",
     "start": "node src/index.js",
+    "build": "prisma generate",
     "db:push": "node scripts/db-push-retry.js",
     "db:seed": "node prisma/seed.js",
     "db:setup": "node scripts/safe-generate.js && node scripts/db-push-retry.js && node prisma/seed.js",

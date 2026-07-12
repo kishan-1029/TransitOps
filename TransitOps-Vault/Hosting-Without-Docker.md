@@ -2,38 +2,50 @@
 
 Primary DB: **Neon** (project `odoo2026`). No Docker required.
 
-## Connection tips
+## Recommended: single domain (one Render URL)
 
-- Prefer the **direct** host (`ep-....aws.neon.tech`) for Prisma — pooler (`-pooler`) can fail on cold start for migrations.
-- Always include `sslmode=require` and optionally `connect_timeout=30`.
-- Free tier compute sleeps; first query after idle may take a few seconds.
+UI + API on the same host. Express serves `client/dist` and `/api/*`.
 
-## Local `.env`
+### Render settings
+
+1. **New → Web Service** → connect `kishan-1029/TransitOps`
+2. **Root Directory:** leave **empty** (repo root)
+3. **Build Command:** `npm run build`
+4. **Start Command:** `npm start`
+5. Environment:
 
 ```
-DATABASE_URL="postgresql://neondb_owner:PASSWORD@ep-xxxx.c-9.us-east-1.aws.neon.tech/neondb?sslmode=require&connect_timeout=30"
-JWT_SECRET="change-me"
-PORT=5000
-CLIENT_ORIGIN="http://localhost:5173"
+DATABASE_URL=postgresql://...@ep-....neon.tech/neondb?sslmode=require
+DIRECT_URL=postgresql://...@ep-....neon.tech/neondb?sslmode=require
+JWT_SECRET=long-random-string
+JWT_EXPIRES_IN=24h
+CLIENT_ORIGIN=*
 LOCKOUT_MINUTES=15
+NODE_ENV=production
 ```
 
-Then:
+Do **not** set `VITE_API_URL` — the browser calls `/api` on the same domain.
+
+After deploy open: `https://YOUR-SERVICE.onrender.com`  
+Health: `https://YOUR-SERVICE.onrender.com/api/health`
+
+### Local same-domain test
 
 ```bash
-cd server
-npx prisma db push
-node prisma/seed.js
-npm run dev
+cd client && npm run build
+cd ../server && npm start
+# open http://localhost:5000
 ```
 
-## Deploy
+## Split hosting (optional)
 
-1. Keep Neon as production DB
-2. Deploy API (Render/Railway) with same `DATABASE_URL`
-3. Deploy client (Vercel) with `VITE_API_URL`
-4. Set `CLIENT_ORIGIN` to frontend URL
+1. Neon = DB  
+2. Render/Railway = API only (`server` root)  
+3. Vercel = client with `VITE_API_URL=https://api...`  
+4. Set `CLIENT_ORIGIN` to the Vercel URL  
 
-## Security
+## Neon tips
 
-Never commit `.env`. Rotate Neon password if it was shared in chat.
+- Prefer direct host (`ep-....aws.neon.tech`) with `sslmode=require`
+- Free tier sleeps; first request after idle can be slow
+- Never commit `.env`; rotate password if it was shared

@@ -44,7 +44,7 @@ export function AuthProvider({ children }) {
       .finally(() => setLoading(false));
   }, []);
 
-  async function login({ email, password, role, remember }) {
+  async function login({ email, password, role, remember = true }) {
     const res = await api.post(API.login, {
       email: String(email || '').trim().toLowerCase(),
       password,
@@ -52,9 +52,15 @@ export function AuthProvider({ children }) {
     });
     if (!res.data.isOk) throw new Error(res.data.message);
     const { token, user: u } = res.data.data;
+    // Stateless JWT — many users can be logged in at once (no single-session kick).
+    // Persist for 24h token lifetime so refresh/reopen keeps the session.
     localStorage.setItem('transitops_token', token);
     localStorage.setItem('transitops_user', JSON.stringify(u));
-    if (!remember) sessionStorage.setItem('transitops_token', token);
+    localStorage.setItem('transitops_remember', remember ? '1' : '0');
+    if (!remember) {
+      // Still keep token for this browser until logout / JWT expiry (24h).
+      sessionStorage.setItem('transitops_active', '1');
+    }
     setUser(u);
     return u;
   }
@@ -62,7 +68,9 @@ export function AuthProvider({ children }) {
   function logout() {
     localStorage.removeItem('transitops_token');
     localStorage.removeItem('transitops_user');
+    localStorage.removeItem('transitops_remember');
     sessionStorage.removeItem('transitops_token');
+    sessionStorage.removeItem('transitops_active');
     setUser(null);
   }
 

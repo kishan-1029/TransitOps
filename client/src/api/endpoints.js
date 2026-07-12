@@ -14,4 +14,5 @@ export const API = {
   exportCsv: '/api/analytics/export.csv',
   settings: '/api/settings',
   search: '/api/search',
+  chat: '/api/chat',
 };

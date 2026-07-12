@@ -32,7 +32,7 @@ export function StatusBadge({ status }) {
   );
 }
 
-export function KpiCard({ label, value, accent = 'info', hint }) {
+export function KpiCard({ label, value, accent = 'info', hint, onClick }) {
   const accents = {
     info: 'bg-sky-500',
     success: 'bg-emerald-500',
@@ -40,13 +40,27 @@ export function KpiCard({ label, value, accent = 'info', hint }) {
     soft: 'bg-sky-300',
     danger: 'bg-rose-500',
   };
+  const clickable = typeof onClick === 'function';
+
   return (
-    <div className="relative overflow-hidden rounded-xl border border-[var(--color-border)] bg-[var(--color-panel)] px-4 py-3 shadow-sm">
+    <button
+      type="button"
+      disabled={!clickable}
+      onClick={onClick}
+      className={`relative w-full overflow-hidden rounded-xl border border-[var(--color-border)] bg-[var(--color-panel)] px-4 py-3 text-left shadow-sm transition ${
+        clickable
+          ? 'cursor-pointer hover:-translate-y-0.5 hover:border-[var(--color-accent)] hover:shadow-md'
+          : 'cursor-default'
+      }`}
+    >
       <div className={`absolute left-0 top-0 h-full w-1 ${accents[accent] || accents.info}`} />
       <div className="text-xs uppercase tracking-wide text-[var(--color-muted)]">{label}</div>
       <div className="mt-1 text-2xl font-semibold text-[var(--color-text-strong)]">{value}</div>
       {hint ? <div className="mt-1 text-[11px] text-[var(--color-muted)]">{hint}</div> : null}
-    </div>
+      {clickable ? (
+        <div className="mt-2 text-[11px] font-medium text-[var(--color-accent)]">Open →</div>
+      ) : null}
+    </button>
   );
 }
 

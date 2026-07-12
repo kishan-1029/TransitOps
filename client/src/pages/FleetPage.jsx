@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import api from '../api/client';
 import { API } from '../api/endpoints';
 import { useAuth } from '../context/AuthContext';
@@ -10,6 +11,7 @@ import {
   btnPrimary,
   btnGhost,
   formatNumber,
+  Panel,
 } from '../components/ui';
 
 const emptyForm = {
@@ -23,23 +25,43 @@ const emptyForm = {
   region: 'Gandhinagar',
 };
 
+const STATUS_FILTERS = new Set(['Available', 'OnTrip', 'InShop', 'Retired']);
+
 export default function FleetPage() {
   const { can } = useAuth();
+  const [searchParams] = useSearchParams();
+  const initialStatus = STATUS_FILTERS.has(searchParams.get('status'))
+    ? searchParams.get('status')
+    : 'All';
   const [vehicles, setVehicles] = useState([]);
   const [type, setType] = useState('All');
-  const [status, setStatus] = useState('All');
+  const [status, setStatus] = useState(initialStatus);
   const [search, setSearch] = useState('');
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState(emptyForm);
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const next = searchParams.get('status');
+    if (STATUS_FILTERS.has(next)) setStatus(next);
+  }, [searchParams]);
 
   async function load() {
-    const res = await api.get(API.vehicles, { params: { type, status, search } });
-    setVehicles(res.data.data || []);
+    setLoading(true);
+    try {
+      const res = await api.get(API.vehicles, { params: { type, status, search } });
+      setVehicles(res.data.data || []);
+      setError('');
+    } catch (e) {
+      setError(e.response?.data?.message || 'Failed to load');
+    } finally {
+      setLoading(false);
+    }
   }
 
   useEffect(() => {
-    load().catch((e) => setError(e.response?.data?.message || 'Failed to load'));
+    load();
   }, [type, status, search]);
 
   async function onSubmit(e) {
@@ -58,7 +80,10 @@ export default function FleetPage() {
 
   return (
     <div>
-      <PageHeader title="Vehicle Registry">
+      <PageHeader
+        title="Vehicle Registry"
+        subtitle="Master list of fleet assets — filter by type, status, or registration"
+      >
         {can('fleet', 'full') ? (
           <button type="button" className={btnPrimary} onClick={() => setShowForm(true)}>
             + Add Vehicle
@@ -66,94 +91,179 @@ export default function FleetPage() {
         ) : null}
       </PageHeader>
 
-      <div className="mb-4 flex flex-wrap gap-3">
-        <select className={`${inputClass} w-36`} value={type} onChange={(e) => setType(e.target.value)}>
-          <option>All</option>
-          <option>Van</option>
-          <option>Truck</option>
-          <option>Mini</option>
-        </select>
-        <select className={`${inputClass} w-36`} value={status} onChange={(e) => setStatus(e.target.value)}>
-          <option>All</option>
-          <option value="Available">Available</option>
-          <option value="OnTrip">On Trip</option>
-          <option value="InShop">In Shop</option>
-          <option value="Retired">Retired</option>
-        </select>
-        <input
-          className={`${inputClass} w-56`}
-          placeholder="Search reg. no..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
-      </div>
+      <Panel className="mb-5">
+        <div className="mb-3 flex flex-wrap items-end justify-between gap-2">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-wide text-[var(--color-muted)]">Filters</p>
+            <p className="mt-0.5 text-xs text-[var(--color-muted)]">
+              Narrow the registry before dispatch or maintenance decisions
+            </p>
+          </div>
+          <p className="text-xs text-[var(--color-muted)]">
+            {loading ? 'Loading…' : `${vehicles.length} vehicle${vehicles.length === 1 ? '' : 's'}`}
+          </p>
+        </div>
 
-      {error ? <p className="mb-3 text-sm text-rose-400">{error}</p> : null}
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+          <label className="block text-xs text-[var(--color-muted)]">
+            <span className="mb-1 block font-medium text-[var(--color-text)]">Vehicle Type</span>
+            <span className="mb-1.5 block text-[11px] opacity-80">Van · Truck · Mini body class</span>
+            <select className={inputClass} value={type} onChange={(e) => setType(e.target.value)}>
+              <option>All</option>
+              <option>Van</option>
+              <option>Truck</option>
+              <option>Mini</option>
+            </select>
+          </label>
 
-      <div className="overflow-x-auto rounded-xl border border-[var(--color-border)] bg-[var(--color-panel)]">
-        <table className="w-full text-left text-sm">
-          <thead className="text-xs uppercase text-zinc-500">
-            <tr>
-              <th className="px-4 py-3">Reg. No.</th>
-              <th>Name/Model</th>
-              <th>Type</th>
-              <th>Capacity</th>
-              <th>Odometer</th>
-              <th>Acq. Cost</th>
-              <th>Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            {vehicles.map((v) => (
-              <tr key={v.id} className="border-t border-[var(--color-border)]">
-                <td className="px-4 py-3 font-medium">{v.regNo}</td>
-                <td>{v.name}</td>
-                <td>{v.type}</td>
-                <td>{v.capacityKg >= 1000 ? `${v.capacityKg / 1000} Ton` : `${v.capacityKg} kg`}</td>
-                <td>{formatNumber(v.odometer)}</td>
-                <td>{formatNumber(v.acquisitionCost)}</td>
-                <td>
-                  <StatusBadge status={v.status} />
-                </td>
+          <label className="block text-xs text-[var(--color-muted)]">
+            <span className="mb-1 block font-medium text-[var(--color-text)]">Status</span>
+            <span className="mb-1.5 block text-[11px] opacity-80">Available · On Trip · In Shop · Retired</span>
+            <select className={inputClass} value={status} onChange={(e) => setStatus(e.target.value)}>
+              <option>All</option>
+              <option value="Available">Available</option>
+              <option value="OnTrip">On Trip</option>
+              <option value="InShop">In Shop</option>
+              <option value="Retired">Retired</option>
+            </select>
+          </label>
+
+          <label className="block text-xs text-[var(--color-muted)]">
+            <span className="mb-1 block font-medium text-[var(--color-text)]">Search registration</span>
+            <span className="mb-1.5 block text-[11px] opacity-80">Match reg. no. or vehicle name/model</span>
+            <input
+              className={inputClass}
+              placeholder="e.g. GJ01AB452 or VAN-05"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+          </label>
+        </div>
+      </Panel>
+
+      {error ? (
+        <p className="mb-3 rounded-lg border border-rose-500/40 bg-rose-500/10 px-3 py-2 text-sm text-rose-600">
+          {error}
+        </p>
+      ) : null}
+
+      <div className="overflow-hidden rounded-xl border border-[var(--color-border)] bg-[var(--color-panel)] shadow-sm">
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-sm">
+            <thead>
+              <tr className="border-b border-[var(--color-border)] bg-[var(--color-panel-2)] text-xs uppercase tracking-wide text-[var(--color-muted)]">
+                <th className="px-4 py-3 font-semibold">Reg. No.</th>
+                <th className="py-3 font-semibold">Name / Model</th>
+                <th className="py-3 font-semibold">Type</th>
+                <th className="py-3 font-semibold">Capacity</th>
+                <th className="py-3 font-semibold">Odometer</th>
+                <th className="py-3 font-semibold">Acq. Cost</th>
+                <th className="py-3 pr-4 font-semibold">Status</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {!loading && vehicles.length === 0 ? (
+                <tr>
+                  <td colSpan={7} className="px-4 py-10 text-center text-[var(--color-muted)]">
+                    No vehicles match these filters.
+                  </td>
+                </tr>
+              ) : null}
+              {vehicles.map((v) => (
+                <tr
+                  key={v.id}
+                  className="border-t border-[var(--color-border)] text-[var(--color-text)] transition-colors hover:bg-black/[0.03]"
+                >
+                  <td className="px-4 py-3 font-semibold text-[var(--color-text-strong)]">{v.regNo}</td>
+                  <td className="py-3">{v.name}</td>
+                  <td className="py-3">{v.type}</td>
+                  <td className="py-3">
+                    {v.capacityKg >= 1000 ? `${v.capacityKg / 1000} Ton` : `${v.capacityKg} kg`}
+                  </td>
+                  <td className="py-3 tabular-nums">{formatNumber(v.odometer)}</td>
+                  <td className="py-3 tabular-nums">{formatNumber(v.acquisitionCost)}</td>
+                  <td className="py-3 pr-4">
+                    <StatusBadge status={v.status} />
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
 
-      <p className="mt-3 text-sm text-[var(--color-accent)]">
-        Rule: Registration No. must be unique · Retired/In Shop vehicles are hidden from Trip Dispatcher
+      <p className="mt-3 rounded-lg border border-[var(--color-accent)]/30 bg-[var(--color-accent)]/10 px-3 py-2 text-sm text-[var(--color-accent)]">
+        Rule: Registration No. must be unique · Retired / In Shop vehicles are hidden from Trip Dispatcher
       </p>
 
       {showForm ? (
-        <div className="fixed inset-0 z-50 grid place-items-center bg-black/70 p-4">
-          <form onSubmit={onSubmit} className="w-full max-w-lg rounded-xl border border-[var(--color-border)] bg-[#1a1a1a] p-5">
-            <h3 className="mb-4 text-lg font-semibold">Add Vehicle</h3>
+        <div className="fixed inset-0 z-50 grid place-items-center bg-black/50 p-4 backdrop-blur-[2px]">
+          <form
+            onSubmit={onSubmit}
+            className="w-full max-w-lg rounded-xl border border-[var(--color-border)] bg-[var(--color-panel)] p-5 shadow-2xl"
+          >
+            <h3 className="mb-1 text-lg font-semibold text-[var(--color-text-strong)]">Add Vehicle</h3>
+            <p className="mb-4 text-xs text-[var(--color-muted)]">
+              Registration number must be unique across the fleet.
+            </p>
             <div className="grid gap-2 sm:grid-cols-2">
               <Field label="Reg. No.">
-                <input className={inputClass} required value={form.regNo} onChange={(e) => setForm({ ...form, regNo: e.target.value })} />
+                <input
+                  className={inputClass}
+                  required
+                  value={form.regNo}
+                  onChange={(e) => setForm({ ...form, regNo: e.target.value })}
+                />
               </Field>
-              <Field label="Name/Model">
-                <input className={inputClass} required value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
+              <Field label="Name / Model">
+                <input
+                  className={inputClass}
+                  required
+                  value={form.name}
+                  onChange={(e) => setForm({ ...form, name: e.target.value })}
+                />
               </Field>
               <Field label="Type">
-                <select className={inputClass} value={form.type} onChange={(e) => setForm({ ...form, type: e.target.value })}>
+                <select
+                  className={inputClass}
+                  value={form.type}
+                  onChange={(e) => setForm({ ...form, type: e.target.value })}
+                >
                   <option>Van</option>
                   <option>Truck</option>
                   <option>Mini</option>
                 </select>
               </Field>
               <Field label="Capacity (kg)">
-                <input type="number" className={inputClass} value={form.capacityKg} onChange={(e) => setForm({ ...form, capacityKg: e.target.value })} />
+                <input
+                  type="number"
+                  className={inputClass}
+                  value={form.capacityKg}
+                  onChange={(e) => setForm({ ...form, capacityKg: e.target.value })}
+                />
               </Field>
               <Field label="Odometer">
-                <input type="number" className={inputClass} value={form.odometer} onChange={(e) => setForm({ ...form, odometer: e.target.value })} />
+                <input
+                  type="number"
+                  className={inputClass}
+                  value={form.odometer}
+                  onChange={(e) => setForm({ ...form, odometer: e.target.value })}
+                />
               </Field>
               <Field label="Acquisition Cost">
-                <input type="number" className={inputClass} value={form.acquisitionCost} onChange={(e) => setForm({ ...form, acquisitionCost: e.target.value })} />
+                <input
+                  type="number"
+                  className={inputClass}
+                  value={form.acquisitionCost}
+                  onChange={(e) => setForm({ ...form, acquisitionCost: e.target.value })}
+                />
               </Field>
               <Field label="Region">
-                <input className={inputClass} value={form.region} onChange={(e) => setForm({ ...form, region: e.target.value })} />
+                <input
+                  className={inputClass}
+                  value={form.region}
+                  onChange={(e) => setForm({ ...form, region: e.target.value })}
+                />
               </Field>
             </div>
             <div className="mt-4 flex justify-end gap-2">

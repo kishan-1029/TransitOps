@@ -3,6 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import { ThemeToggleButton } from '../components/ui';
 import GlobalSearch from '../components/GlobalSearch';
+import ChatWidget from '../components/ChatWidget';
 
 const NAV = [
   { to: '/', label: 'Dashboard', module: 'dashboard' },
@@ -84,6 +85,7 @@ export default function AppLayout() {
         <main className="flex-1 overflow-auto p-6">
           <Outlet />
         </main>
+        <ChatWidget />
       </div>
     </div>
   );

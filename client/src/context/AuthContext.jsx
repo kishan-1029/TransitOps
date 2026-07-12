@@ -45,7 +45,11 @@ export function AuthProvider({ children }) {
   }, []);
 
   async function login({ email, password, role, remember }) {
-    const res = await api.post(API.login, { email, password, role });
+    const res = await api.post(API.login, {
+      email: String(email || '').trim().toLowerCase(),
+      password,
+      role,
+    });
     if (!res.data.isOk) throw new Error(res.data.message);
     const { token, user: u } = res.data.data;
     localStorage.setItem('transitops_token', token);

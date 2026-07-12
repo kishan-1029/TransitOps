@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Sun, Moon } from 'lucide-react';
 import { useAuth, ROLE_LABELS } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 import { Field, inputClass, btnPrimary } from '../components/ui';
 
 const DEMO_PASSWORD = 'Password@123';
@@ -36,6 +38,7 @@ const DEMO_ACCOUNTS = [
 
 export default function LoginPage() {
   const { login } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
   const [email, setEmail] = useState(DEMO_ACCOUNTS[0].email);
   const [password, setPassword] = useState(DEMO_PASSWORD);
@@ -44,6 +47,7 @@ export default function LoginPage() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(true);
+  const isDark = theme === 'dark';
 
   function pickAccount(account) {
     setRole(account.role);
@@ -76,7 +80,7 @@ export default function LoginPage() {
   return (
     <div className="grid min-h-screen lg:grid-cols-2">
       <section
-        className="relative flex flex-col justify-between overflow-hidden px-8 py-10 sm:px-10 sm:py-12"
+        className="relative flex flex-col justify-between overflow-hidden px-8 py-10 sm:px-10 sm:py-12 order-2 lg:order-1"
         style={{ background: 'var(--color-brand-panel)', color: 'var(--color-brand-text)' }}
       >
         <div
@@ -139,41 +143,21 @@ export default function LoginPage() {
         </p>
       </section>
 
-      <section className="flex items-center justify-center bg-[var(--color-bg)] px-6 py-10 sm:px-8 sm:py-12">
+      <section className="relative flex items-center justify-center bg-[var(--color-bg)] px-6 py-10 sm:px-8 sm:py-12 order-1 lg:order-2">
+        <button
+          type="button"
+          onClick={toggleTheme}
+          className="absolute right-4 top-4 p-2 rounded-lg border border-[var(--color-border)] text-[var(--color-muted)] hover:bg-black/5 hover:text-[var(--color-text)] transition"
+          aria-label="Toggle theme"
+        >
+          {isDark ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+        </button>
+
         <form onSubmit={onSubmit} className="w-full max-w-md">
           <h2 className="text-2xl font-semibold text-[var(--color-text-strong)]">Sign in to your account</h2>
           <p className="mt-1 text-sm text-[var(--color-muted)]">
             Use a demo email below, or click a role on the left to auto-fill.
           </p>
-
-          {/* Always-visible credential cheat sheet for reviewers */}
-          <div className="mt-5 rounded-xl border border-[var(--color-accent)]/35 bg-[var(--color-accent)]/8 p-4">
-            <p className="text-xs font-semibold uppercase tracking-wide text-[var(--color-accent)]">
-              Demo accounts (hackathon reviewers)
-            </p>
-            <p className="mt-2 text-sm text-[var(--color-text)]">
-              Password (all users):{' '}
-              <code className="rounded bg-[var(--color-panel)] px-2 py-0.5 font-mono text-[13px] font-semibold text-[var(--color-text-strong)]">
-                {DEMO_PASSWORD}
-              </code>
-            </p>
-            <ul className="mt-3 space-y-1.5">
-              {DEMO_ACCOUNTS.map((account) => (
-                <li key={account.email}>
-                  <button
-                    type="button"
-                    onClick={() => pickAccount(account)}
-                    className="flex w-full items-center justify-between gap-2 rounded-lg border border-transparent px-2 py-1.5 text-left text-xs transition hover:border-[var(--color-border)] hover:bg-[var(--color-panel)]"
-                  >
-                    <span className="font-medium text-[var(--color-text)]">
-                      {ROLE_LABELS[account.role] || account.role}
-                    </span>
-                    <span className="font-mono text-[var(--color-muted)]">{account.email}</span>
-                  </button>
-                </li>
-              ))}
-            </ul>
-          </div>
 
           <div className="mt-6">
             <Field label="Email">

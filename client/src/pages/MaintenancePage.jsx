@@ -114,36 +114,38 @@ export default function MaintenancePage() {
         </Panel>
 
         <Panel title="Service Log">
-          <table className="w-full text-left text-sm">
-            <thead className="text-xs uppercase text-zinc-500">
-              <tr>
-                <th className="py-2">Vehicle</th>
-                <th>Service</th>
-                <th>Cost</th>
-                <th>Status</th>
-                <th />
-              </tr>
-            </thead>
-            <tbody>
-              {logs.map((l) => (
-                <tr key={l.id} className="border-t border-[var(--color-border)]">
-                  <td className="py-2">{l.vehicle?.name}</td>
-                  <td>{l.serviceType}</td>
-                  <td>{formatNumber(l.cost)}</td>
-                  <td>
-                    <StatusBadge status={l.status === 'Active' ? 'InShop' : 'Completed'} />
-                  </td>
-                  <td>
-                    {can('maintenance', 'full') && l.status === 'Active' ? (
-                      <button type="button" className="text-xs text-sky-400" onClick={() => closeLog(l.id)}>
-                        Close
-                      </button>
-                    ) : null}
-                  </td>
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-sm min-w-[500px]">
+              <thead className="text-xs uppercase text-zinc-500">
+                <tr>
+                  <th className="py-2">Vehicle</th>
+                  <th>Service</th>
+                  <th>Cost</th>
+                  <th>Status</th>
+                  <th />
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {logs.map((l) => (
+                  <tr key={l.id} className="border-t border-[var(--color-border)]">
+                    <td className="py-2">{l.vehicle?.name}</td>
+                    <td>{l.serviceType}</td>
+                    <td>{formatNumber(l.cost)}</td>
+                    <td>
+                      <StatusBadge status={l.status === 'Active' ? 'InShop' : 'Completed'} />
+                    </td>
+                    <td>
+                      {can('maintenance', 'full') && l.status === 'Active' ? (
+                        <button type="button" className="text-xs text-sky-400" onClick={() => closeLog(l.id)}>
+                          Close
+                        </button>
+                      ) : null}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </Panel>
       </div>
     </div>

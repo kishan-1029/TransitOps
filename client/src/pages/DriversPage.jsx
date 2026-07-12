@@ -142,7 +142,7 @@ export default function DriversPage() {
 
       {loading ? <TableSkeleton rows={7} cols={8} /> : (
       <div className="overflow-x-auto rounded-xl border border-[var(--color-border)] bg-[var(--color-panel)]">
-        <table className="w-full text-left text-sm">
+        <table className="w-full text-left text-sm min-w-[800px]">
           <thead className="text-xs uppercase text-[var(--color-muted)]">
             <tr>
               <th className="px-4 py-3">Driver</th>
@@ -220,7 +220,7 @@ export default function DriversPage() {
 
       {showForm ? (
         <div className="fixed inset-0 z-50 grid place-items-center bg-black/60 p-4">
-          <form onSubmit={onSubmit} className="w-full max-w-lg rounded-xl border border-[var(--color-border)] bg-[var(--color-panel)] p-5">
+          <form onSubmit={onSubmit} className="w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-xl border border-[var(--color-border)] bg-[var(--color-panel)] p-5 shadow-2xl">
             <h3 className="mb-4 text-lg font-semibold text-[var(--color-text-strong)]">Add Driver</h3>
             <div className="grid gap-2 sm:grid-cols-2">
               <Field label="Name">
@@ -262,7 +262,7 @@ export default function DriversPage() {
 
       {editRow ? (
         <div className="fixed inset-0 z-50 grid place-items-center bg-black/60 p-4">
-          <form onSubmit={saveEdit} className="w-full max-w-md rounded-xl border border-[var(--color-border)] bg-[var(--color-panel)] p-5">
+          <form onSubmit={saveEdit} className="w-full max-w-md max-h-[90vh] overflow-y-auto rounded-xl border border-[var(--color-border)] bg-[var(--color-panel)] p-5 shadow-2xl">
             <h3 className="mb-3 text-lg font-semibold">Update {editRow.name}</h3>
             <Field label="Safety Score (0–100)">
               <input

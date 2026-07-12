@@ -1,8 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth, ROLE_LABELS } from '../context/AuthContext';
-import { useTheme } from '../context/ThemeContext';
-import { Field, inputClass, btnPrimary, ThemeToggleButton } from '../components/ui';
+import { Field, inputClass, btnPrimary } from '../components/ui';
 
 const ROLES = ['FLEET_MANAGER', 'DRIVER', 'SAFETY_OFFICER', 'FINANCIAL_ANALYST'];
 
@@ -15,7 +14,6 @@ const ROLE_BLURBS = {
 
 export default function LoginPage() {
   const { login } = useAuth();
-  const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
   const [email, setEmail] = useState('raven.k@transitops.in');
   const [password, setPassword] = useState('Password@123');
@@ -39,11 +37,7 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="relative grid min-h-screen lg:grid-cols-2">
-      <div className="absolute right-4 top-4 z-10">
-        <ThemeToggleButton theme={theme} onToggle={toggleTheme} />
-      </div>
-
+    <div className="grid min-h-screen lg:grid-cols-2">
       <section
         className="relative flex flex-col justify-between overflow-hidden px-10 py-12"
         style={{ background: 'var(--color-brand-panel)', color: 'var(--color-brand-text)' }}

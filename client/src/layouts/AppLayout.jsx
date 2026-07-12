@@ -1,18 +1,28 @@
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
+import {
+  BarChart3,
+  Fuel,
+  LayoutDashboard,
+  Route,
+  Settings,
+  Truck,
+  Users,
+  Wrench,
+} from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
-import { ThemeToggleButton } from '../components/ui';
 import GlobalSearch from '../components/GlobalSearch';
+import HeaderSettingsMenu from '../components/HeaderSettingsMenu';
 
 const NAV = [
-  { to: '/', label: 'Dashboard', module: 'dashboard' },
-  { to: '/fleet', label: 'Fleet', module: 'fleet' },
-  { to: '/drivers', label: 'Drivers', module: 'drivers' },
-  { to: '/trips', label: 'Trips', module: 'trips' },
-  { to: '/maintenance', label: 'Maintenance', module: 'maintenance' },
-  { to: '/fuel', label: 'Fuel & Expenses', module: 'fuel' },
-  { to: '/analytics', label: 'Analytics', module: 'analytics' },
-  { to: '/settings', label: 'Settings', module: 'settings' },
+  { to: '/', label: 'Dashboard', module: 'dashboard', icon: LayoutDashboard },
+  { to: '/fleet', label: 'Fleet', module: 'fleet', icon: Truck },
+  { to: '/drivers', label: 'Drivers', module: 'drivers', icon: Users },
+  { to: '/trips', label: 'Trips', module: 'trips', icon: Route },
+  { to: '/maintenance', label: 'Maintenance', module: 'maintenance', icon: Wrench },
+  { to: '/fuel', label: 'Fuel & Expenses', module: 'fuel', icon: Fuel },
+  { to: '/analytics', label: 'Analytics', module: 'analytics', icon: BarChart3 },
+  { to: '/settings', label: 'Settings', module: 'settings', icon: Settings },
 ];
 
 export default function AppLayout() {
@@ -38,22 +48,26 @@ export default function AppLayout() {
           </div>
         </div>
         <nav className="flex flex-1 flex-col gap-1 p-3">
-          {NAV.filter((item) => can(item.module, 'view')).map((item) => (
-            <NavLink
-              key={item.to}
-              to={item.to}
-              end={item.to === '/'}
-              className={({ isActive }) =>
-                `rounded-lg px-3 py-2 text-sm transition ${
-                  isActive
-                    ? 'border border-[var(--color-accent)] bg-[var(--color-accent)]/10 text-[var(--color-text-strong)]'
-                    : 'text-[var(--color-muted)] hover:bg-black/5 hover:text-[var(--color-text)]'
-                }`
-              }
-            >
-              {item.label}
-            </NavLink>
-          ))}
+          {NAV.filter((item) => can(item.module, 'view')).map((item) => {
+            const Icon = item.icon;
+            return (
+              <NavLink
+                key={item.to}
+                to={item.to}
+                end={item.to === '/'}
+                className={({ isActive }) =>
+                  `flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm transition ${
+                    isActive
+                      ? 'border border-[var(--color-accent)] bg-[var(--color-accent)]/10 text-[var(--color-text-strong)]'
+                      : 'text-[var(--color-muted)] hover:bg-black/5 hover:text-[var(--color-text)]'
+                  }`
+                }
+              >
+                <Icon className="h-4 w-4 shrink-0" strokeWidth={2} aria-hidden="true" />
+                <span>{item.label}</span>
+              </NavLink>
+            );
+          })}
         </nav>
       </aside>
 
@@ -61,7 +75,6 @@ export default function AppLayout() {
         <header className="flex items-center justify-between gap-4 border-b border-[var(--color-border)] bg-[var(--color-panel)] px-6 py-3">
           <GlobalSearch />
           <div className="flex shrink-0 items-center gap-3">
-            <ThemeToggleButton theme={theme} onToggle={toggleTheme} />
             <div className="text-right">
               <div className="text-sm font-medium text-[var(--color-text-strong)]">{user?.name}</div>
               <div className="text-xs text-sky-500">{roleLabel}</div>
@@ -69,16 +82,14 @@ export default function AppLayout() {
             <div className="grid h-10 w-10 place-items-center rounded-full bg-sky-700 text-sm font-semibold text-white">
               {initials}
             </div>
-            <button
-              type="button"
-              onClick={() => {
+            <HeaderSettingsMenu
+              theme={theme}
+              onToggleTheme={toggleTheme}
+              onLogout={() => {
                 logout();
                 navigate('/login');
               }}
-              className="rounded-lg border border-[var(--color-border)] px-3 py-1.5 text-xs text-[var(--color-muted)] hover:bg-black/5"
-            >
-              Logout
-            </button>
+            />
           </div>
         </header>
         <main className="flex-1 overflow-auto p-6">

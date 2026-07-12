@@ -105,16 +105,3 @@ export function formatDate(d) {
   const dt = new Date(d);
   return dt.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' });
 }
-
-export function ThemeToggleButton({ theme, onToggle }) {
-  return (
-    <button
-      type="button"
-      onClick={onToggle}
-      className="rounded-lg border border-[var(--color-border)] px-3 py-1.5 text-xs text-[var(--color-text)] hover:bg-black/5"
-      title="Toggle light/dark mode"
-    >
-      {theme === 'dark' ? 'Light' : 'Dark'}
-    </button>
-  );
-}
